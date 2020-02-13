@@ -1,0 +1,35 @@
+# MPI and its dependencies
+ARG MPI_IMAGE=gmao/mpi-openmpi:4.0.1
+FROM ${MPI_IMAGE}
+
+# Get baselibs version at runtime
+ARG version
+ENV name_version ESMA-Baselibs-${version}
+ENV config gfortran_8.2.1-openmpi_4.0.1
+
+# Python
+COPY --from=continuumio/anaconda:latest /opt/conda /opt/conda
+ENV PATH /opt/conda/bin:$PATH
+
+ENV rootloc /baselibs/${version}
+ENV baselibs_src ${rootloc}/${name_version}
+
+COPY ./${name_version} ${baselibs_src}
+
+RUN yum install -y git byacc bison flex expat-devel texinfo epel-release && \
+    yum install -y file automake autoconf && \
+    yum install -y cmake3 && ln -s /usr/bin/cmake3 /usr/bin/cmake && \
+    \cd ${baselibs_src} && \
+    make -j8 install ESMF_COMM=openmpi CONFIG_SETUP=${config} 2>&1 |tee log.build && \
+    grep -lr "mpirun -n" | xargs sed -i 's/mpirun\ -n/mpirun\ --allow-run-as-root\ -n/g' && \
+    grep -lr "mpiexec -n" | xargs sed -i 's/mpiexec\ -n/mpiexec\ --allow-run-as-root\ -n/g' && \
+    make -j8 check ESMF_COMM=openmpi 2>&1 |tee log.check && \
+    mv log.* ${rootloc} && \
+    cd / && \rm -rf ${baselibs_src}
+
+ENV BASEDIR ${rootloc}/x86_64-unknown-linux-gnu/${config}
+
+CMD echo "BASEDIR: ${BASEDIR}"
+
+# Build command
+# > docker build --build-arg version=x.y.z -f Dockerfile.baselibs -t gmao/esma-baselibs:<version> .
