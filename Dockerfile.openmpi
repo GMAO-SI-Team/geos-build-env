@@ -1,6 +1,6 @@
-FROM gmao/compiler-gcc:8.2.1
+FROM gmao/compiler-gcc:9.1.1
 
-ENV myOpenMPI openmpi-4.0.1
+ENV myOpenMPI openmpi-4.0.2
 
 # Download and build ${myOpenMPI}
 RUN mkdir /bld && cd /bld && \
@@ -18,4 +18,4 @@ ENV PATH /opt/${myOpenMPI}/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/${myOpenMPI}/lib:$LD_LIBRARY_PATH
 
 # Build command
-# > docker build -f Dockerfile.openmpi -t gmao/mpi-openmpi:4.0.1 .
+# > docker build -f Dockerfile.openmpi -t gmao/mpi-openmpi:4.0.2 .
