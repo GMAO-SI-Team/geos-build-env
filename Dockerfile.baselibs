@@ -14,6 +14,11 @@ ENV PATH /opt/conda/bin:$PATH
 ENV rootloc /baselibs/${version}
 ENV baselibs_src ${rootloc}/${name_version}
 
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL   en_US.UTF-8
+ENV LANG     en_US.UTF-8
+ENV LC_TYPE  en_US.UTF-8
+
 COPY ./${name_version} ${baselibs_src}
 
 RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm && \
@@ -22,6 +27,7 @@ RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm && \
     yum install -y cmake3 && ln -s /usr/bin/cmake3 /usr/bin/cmake && \
     \cd ${baselibs_src} && \
     make -j8 install ESMF_COMM=openmpi CONFIG_SETUP=${config} 2>&1 |tee log.build && \
+    make verify && \
     mv log.* ${rootloc} && \
     cd / && \rm -rf ${baselibs_src}
 
