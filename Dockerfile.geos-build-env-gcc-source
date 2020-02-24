@@ -1,0 +1,36 @@
+# ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
+ARG BASELIBS_IMAGE=gmao/esma-baselibs-gcc-source:6.0.4
+FROM ${BASELIBS_IMAGE}
+
+# Intel MKL
+#COPY --from=pchakraborty/intel-mkl:2019.1.144 /opt/intel /opt/intel
+
+# MKL version 2019.4-070 (from hpccm)
+RUN rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    yum install -y yum-utils && \
+    yum-config-manager --add-repo https://yum.repos.intel.com/mkl/setup/intel-mkl.repo && \
+    yum install -y \
+        intel-mkl-64bit-2019.4-070 && \
+    rm -rf /var/cache/yum/*
+#RUN echo "source /opt/intel/mkl/bin/mklvars.sh intel64" >> /etc/bashrc
+
+ENV MKLROOT /opt/intel/mkl
+
+# install manage_externals
+RUN cd / && \
+    git clone https://github.com/ESMCI/manage_externals.git && \
+    cd manage_externals
+ENV PATH /manage_externals:$PATH
+
+# install mepo
+RUN cd / && \
+    git clone https://github.com/GEOS-ESM/mepo.git && \
+    cd mepo
+ENV PATH /mepo:$PATH
+
+# Some more dependencies
+RUN yum install -y perl-Env tcsh ImageMagick python36-PyYAML && \
+    ln -s /usr/bin/ctest3 /usr/bin/ctest
+
+# Build command
+# > docker build -f Dockerfile.geos-build-env-gcc-source -t gmao/geos-build-env-gcc-source:<version> .

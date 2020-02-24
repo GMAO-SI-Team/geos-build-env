@@ -22,8 +22,15 @@ RUN cd / && \
     cd manage_externals
 ENV PATH /manage_externals:$PATH
 
+# install mepo
+RUN cd / && \
+    git clone https://github.com/GEOS-ESM/mepo.git && \
+    cd mepo
+ENV PATH /mepo:$PATH
+
 # Some more dependencies
-RUN yum install -y perl-Env tcsh ImageMagick # texlive
+RUN yum install -y perl-Env tcsh ImageMagick python36-PyYAML && \
+    ln -s /usr/bin/ctest3 /usr/bin/ctest
 
 # Build command
 # > docker build -f Dockerfile.geos-build-env -t gmao/geos-build-env:<version> .

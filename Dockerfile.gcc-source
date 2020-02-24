@@ -1,0 +1,24 @@
+FROM centos:7
+
+RUN yum update -y && \
+    yum groupinstall "Development Tools" -y && \
+    yum install wget -y
+
+RUN mkdir /src-gcc && cd /src-gcc && \
+    curl -O https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.gz && \
+    tar xzf gcc-9.2.0.tar.gz && \
+    cd gcc-9.2.0 && \
+    ./contrib/download_prerequisites && \
+    mkdir bld-gcc && cd bld-gcc && \
+    ../configure --prefix=/gcc --enable-languages=c,c++,fortran --disable-multilib && \
+    make -j 8 && \
+    make install && \
+    rm -rf /src-gcc
+
+ENV PATH /gcc/bin:${PATH}
+ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+    
+CMD gfortran --version
+
+# Build command
+# > docker build -f Dockerfile.gcc-source -t gmao/compiler-gcc-source:9.2.0 .
