@@ -29,7 +29,7 @@ RUN cd / && \
 ENV PATH /mepo:$PATH
 
 # Some more dependencies
-RUN yum install -y perl-Env tcsh ImageMagick python36-PyYAML && \
+RUN yum install -y perl-Env tcsh ImageMagick python36-PyYAML python36-numpy-f2py numpy-f2py && \
     ln -s /usr/bin/ctest3 /usr/bin/ctest
 
 # Build command
