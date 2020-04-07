@@ -1,5 +1,7 @@
 # ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
-ARG BASELIBS_IMAGE=gmao/esma-baselibs-gcc-source:6.0.4
+
+ARG version
+ARG BASELIBS_IMAGE=gmao/esma-baselibs-gcc-source:${version}
 FROM ${BASELIBS_IMAGE}
 
 # Intel MKL
@@ -29,8 +31,8 @@ RUN cd / && \
 ENV PATH /mepo:$PATH
 
 # Some more dependencies
-RUN yum install -y perl-Env tcsh ImageMagick python36-PyYAML python36-numpy-f2py numpy-f2py && \
+RUN yum install -y perl-Env tcsh python36-PyYAML python36-numpy-f2py numpy-f2py && \
     ln -s /usr/bin/ctest3 /usr/bin/ctest
 
 # Build command
-# > docker build -f Dockerfile.geos-build-env-gcc-source -t gmao/geos-build-env-gcc-source:<version> .
+# > docker build --build-arg version=x.y.z -f Dockerfile.geos-build-env-gcc-source -t gmao/geos-build-env-gcc-source:<version> .
