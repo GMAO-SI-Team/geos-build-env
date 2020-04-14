@@ -1,11 +1,13 @@
 # MPI and its dependencies
-ARG MPI_IMAGE=gmao/mpi-openmpi-gcc-source:4.0.2
+ARG MPI_IMAGE=gmao/mpi-openmpi-gcc-source:4.0.3
 FROM ${MPI_IMAGE}
 
 # Get baselibs version at runtime
+ARG gccversion=9.3.0
+ARG mpiversion=4.0.3
 ARG version
 ENV name_version ESMA-Baselibs-${version}
-ENV config gfortran_9.2.0-openmpi_4.0.2
+ENV config gfortran_${gccversion}-openmpi_${mpiversion}
 
 # Python
 #COPY --from=continuumio/anaconda:latest /opt/conda /opt/conda
@@ -45,4 +47,4 @@ ENV BASEDIR ${rootloc}/x86_64-unknown-linux-gnu/${config}
 CMD echo "BASEDIR: ${BASEDIR}"
 
 # Build command
-# > docker build --build-arg version=x.y.z -f Dockerfile.baselibs-gcc-source -t gmao/esma-baselibs-gcc-source:<version> .
+# > docker build (--build-arg MPI_IMAGE=gmao/mpi-openmpi-gcc-source:x.y.z) --build-arg version=x.y.z -f Dockerfile.baselibs-gcc-source -t gmao/esma-baselibs-gcc-source:<version> .
