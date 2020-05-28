@@ -4,7 +4,8 @@ ARG version
 
 RUN yum update -y && \
     yum groupinstall "Development Tools" -y && \
-    yum install wget -y
+    yum install wget -y && \
+    yum clean all
 
 RUN mkdir /src-gcc && cd /src-gcc && \
     curl -O https://ftp.gnu.org/gnu/gcc/gcc-${version}/gcc-${version}.tar.gz && \
