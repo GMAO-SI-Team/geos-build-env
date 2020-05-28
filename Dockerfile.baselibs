@@ -21,7 +21,7 @@ ENV LC_TYPE  en_US.UTF-8
 
 COPY ./${name_version} ${baselibs_src}
 
-RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm && \
+RUN yum install -y https://repo.ius.io/ius-release-el7.rpm && \
     yum install -y git2u-all byacc bison flex expat-devel texinfo epel-release && \
     yum install -y file automake autoconf libtool && \
     yum install -y cmake3 && ln -s /usr/bin/cmake3 /usr/bin/cmake && \
