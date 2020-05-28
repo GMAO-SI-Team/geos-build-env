@@ -8,6 +8,7 @@ ENV myOpenMPI openmpi-${version}
 # Download and build ${myOpenMPI}
 RUN mkdir /bld && cd /bld && \
     yum install -y wget && \
+    yum clean all && \
     wget https://download.open-mpi.org/release/open-mpi/v4.0/${myOpenMPI}.tar.gz && \
     tar zxvf ${myOpenMPI}.tar.gz && \
     cd ${myOpenMPI} && \
@@ -21,4 +22,4 @@ ENV PATH /opt/${myOpenMPI}/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/${myOpenMPI}/lib:$LD_LIBRARY_PATH
 
 # Build command
-# > docker build (--build-arg GCC_IMAGE=gmao/compiler-gcc-source/x.y.z) --build-arg version=x.y.z -f Dockerfile.openmpi-gcc-source -t gmao/mpi-openmpi-gcc-source:<version> .
+# > docker build (--build-arg GCC_IMAGE=gmao/compiler-gcc-source:<gccversion>) --build-arg version=<mpiversion> -f Dockerfile.openmpi-gcc-source -t gmao/mpi-openmpi-gcc-source:<mpiversion>-gcc_<gccversion> .
