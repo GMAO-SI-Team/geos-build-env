@@ -1,6 +1,8 @@
-ARG GCC_IMAGE=gmao/compiler-gcc-source:9.3.0
+ARG gccversion
+ARG GCC_IMAGE=gmao/compiler-gcc-source:${gccversion}
 FROM $GCC_IMAGE
 
+ARG gccversion
 ARG version
 
 ENV myOpenMPI openmpi-${version}
@@ -22,4 +24,4 @@ ENV PATH /opt/${myOpenMPI}/bin:$PATH
 ENV LD_LIBRARY_PATH /opt/${myOpenMPI}/lib:$LD_LIBRARY_PATH
 
 # Build command
-# > docker build (--build-arg GCC_IMAGE=gmao/compiler-gcc-source:<gccversion>) --build-arg version=<mpiversion> -f Dockerfile.openmpi-gcc-source -t gmao/mpi-openmpi-gcc-source:<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg version=<mpiversion> --build-arg gccversion=<gccversion> -f Dockerfile.openmpi-gcc-source -t gmao/mpi-openmpi-gcc-source:<mpiversion>-gcc_<gccversion> .

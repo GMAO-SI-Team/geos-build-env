@@ -1,11 +1,14 @@
 # MPI and its dependencies
-ARG MPI_IMAGE=gmao/mpi-openmpi-gcc-source:4.0.3
+
+ARG gccversion
+ARG mpiversion
+ARG MPI_IMAGE=gmao/mpi-openmpi-gcc-source:${mpiversion}-gcc_${gccversion}
 FROM ${MPI_IMAGE}
 
-# Get baselibs version at runtime
-ARG gccversion=9.3.0
-ARG mpiversion=4.0.3
+ARG gccversion
+ARG mpiversion
 ARG version
+# Get baselibs version at runtime
 ENV name_version ESMA-Baselibs-${version}
 ENV config gfortran_${gccversion}-openmpi_${mpiversion}
 
@@ -21,30 +24,24 @@ ENV LC_ALL   en_US.UTF-8
 ENV LANG     en_US.UTF-8
 ENV LC_TYPE  en_US.UTF-8
 
-RUN yum install -y https://centos7.iuscommunity.org/ius-release.rpm && \
+RUN yum install -y https://repo.ius.io/ius-release-el7.rpm && \
     yum erase -y git && \
-    yum install -y git222-all 
-
-#COPY ./${name_version} ${baselibs_src}
-RUN git clone -b v${version} --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src}
-
-RUN yum install -y byacc bison flex expat-devel texinfo epel-release \
+    yum install -y git222-all && \
+    yum install -y byacc bison flex expat-devel texinfo epel-release \
                    file automake autoconf libtool which \
                    cmake3 && \
+    yum clean all && \
     ln -s /usr/bin/cmake3 /usr/bin/cmake && ln -s /usr/bin/ccmake3 /usr/bin/ccmake && \
+    git clone -b v${version} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
     \cd ${baselibs_src} && \
     make -j8 install ESMF_COMM=openmpi CONFIG_SETUP=${config} 2>&1 |tee log.build && \
     make verify && \
     mv log.* ${rootloc} && \
     cd / && \rm -rf ${baselibs_src}
 
-    #grep -lr "mpirun -n" | xargs sed -i 's/mpirun\ -n/mpirun\ --allow-run-as-root\ -n/g' && \
-    #grep -lr "mpiexec -n" | xargs sed -i 's/mpiexec\ -n/mpiexec\ --allow-run-as-root\ -n/g' && \
-    #make -j8 check ESMF_COMM=openmpi 2>&1 |tee log.check && \
- 
 ENV BASEDIR ${rootloc}/x86_64-unknown-linux-gnu/${config}
 
-CMD echo "BASEDIR: ${BASEDIR}"
+#CMD echo "BASEDIR: ${BASEDIR}"
 
 # Build command
-# > docker build (--build-arg MPI_IMAGE=gmao/mpi-openmpi-gcc-source:x.y.z) --build-arg version=x.y.z -f Dockerfile.baselibs-gcc-source -t gmao/esma-baselibs-gcc-source:<version> .
+# > docker build --build-arg version=<baselibversion> --build-arg mpiversion=<mpiversion> --build-arg gccversion=<gccversion> -f Dockerfile.baselibs-gcc-source -t gmao/esma-baselibs-gcc-source:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .

@@ -10,10 +10,7 @@ ARG version
 ARG gccversion
 ARG mpiversion
 # MKL version 2019.4-070 (from hpccm)
-RUN rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
-    yum install -y yum-utils && \
-    yum-config-manager --add-repo https://yum.repos.intel.com/mkl/setup/intel-mkl.repo && \
-    yum install -y intel-mkl-64bit-2019.4-070 && \
+RUN yum install -y yum-utils && \
     yum install -y perl-Env tcsh python36-PyYAML python36-numpy-f2py numpy-f2py && \
     ln -s /usr/bin/ctest3 /usr/bin/ctest && \
     yum clean all && \
@@ -25,8 +22,7 @@ RUN rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW
     git clone https://github.com/GEOS-ESM/mepo.git && \
     cd mepo
 
-ENV MKLROOT /opt/intel/mkl
 ENV PATH /mepo:/manage_externals:$PATH
 
 # Build command
-# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-build-env-gcc-source -t gmao/geos-build-env-gcc-source:<version>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-build-env-gcc-source-nomkl -t gmao/geos-build-env-gcc-source-nomkl:<version>-openmpi_<mpiversion>-gcc_<gccversion> .
