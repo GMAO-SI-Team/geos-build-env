@@ -1,0 +1,17 @@
+# FV3 Standalone
+
+ARG GEOS_IMAGE=gmao/ubuntu20-geos-env-mkl:6.0.13-openmpi_4.0.4-gcc_10.2.0
+FROM ${GEOS_IMAGE}
+
+ARG version
+
+RUN git clone -b v${version} https://github.com/GEOS-ESM/GEOSfvdycore.git && \
+    cd GEOSfvdycore && \
+    mepo init && mepo clone && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ && \
+    make -j install
+
+# Build command
+# > docker build --build-arg version=x.y.z -f Dockerfile.geos-fv3standalone -t gmao/ubuntu20-geos-fv3standalone:x.y.z .

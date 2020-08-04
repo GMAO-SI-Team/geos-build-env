@@ -1,0 +1,30 @@
+FROM ubuntu:20.04
+
+ARG version
+
+RUN apt-get update && \
+    apt-get install -y \
+       build-essential \
+       curl \
+       manpages-dev \
+       wget && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir /src-gcc && cd /src-gcc && \
+    curl -O https://ftp.gnu.org/gnu/gcc/gcc-${version}/gcc-${version}.tar.gz && \
+    tar xzf gcc-${version}.tar.gz && \
+    cd gcc-${version} && \
+    ./contrib/download_prerequisites && \
+    mkdir bld-gcc && cd bld-gcc && \
+    ../configure --prefix=/gcc --enable-languages=c,c++,fortran --disable-multilib && \
+    make -j 8 && \
+    make install && \
+    rm -rf /src-gcc
+
+ENV PATH /gcc/bin:${PATH}
+ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+    
+RUN echo $(gfortran --version)
+
+# Build command
+# > docker build --build-arg version=x.y.z -f Dockerfile.gcc -t gmao/ubuntu20-gcc:<version> .

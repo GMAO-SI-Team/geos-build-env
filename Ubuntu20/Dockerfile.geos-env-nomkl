@@ -1,0 +1,26 @@
+# ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
+
+ARG version
+ARG gccversion
+ARG mpiversion
+ARG BASELIBS_IMAGE=gmao/ubuntu20-baselibs:${version}-openmpi_${mpiversion}-gcc_${gccversion}
+FROM ${BASELIBS_IMAGE}
+
+ARG version
+ARG gccversion
+ARG mpiversion
+
+RUN apt-get update && \
+    apt-get install -y tcsh ksh && \
+    rm -rf /var/lib/apt/lists/* && \
+    cd / && \
+    git clone https://github.com/ESMCI/manage_externals.git && \
+    cd manage_externals && \
+    cd / && \
+    git clone https://github.com/GEOS-ESM/mepo.git && \
+    cd mepo
+
+ENV PATH /mepo:/manage_externals:$PATH
+
+# Build command
+# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-nomkl -t gmao/ubuntu20-geos-env-nomkl:<version>-openmpi_<mpiversion>-gcc_<gccversion> .

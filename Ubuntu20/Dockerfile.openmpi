@@ -1,0 +1,25 @@
+ARG gccversion
+ARG GCC_IMAGE=gmao/ubuntu20-gcc:${gccversion}
+FROM $GCC_IMAGE
+
+ARG gccversion
+ARG version
+
+ENV myOpenMPI openmpi-${version}
+
+# Download and build ${myOpenMPI}
+RUN mkdir /bld && cd /bld && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.0/${myOpenMPI}.tar.gz && \
+    tar zxvf ${myOpenMPI}.tar.gz && \
+    cd ${myOpenMPI} && \
+    ./configure --prefix=/opt/${myOpenMPI} --enable-static && \
+    make -j 8 && make install && \
+    cd / && \rm -rf /bld
+
+# Add ${myOpenMPI} to path
+ENV OPENMPI /opt/${myOpenMPI}
+ENV PATH /opt/${myOpenMPI}/bin:$PATH
+ENV LD_LIBRARY_PATH /opt/${myOpenMPI}/lib:$LD_LIBRARY_PATH
+
+# Build command
+# > docker build --build-arg version=<mpiversion> --build-arg gccversion=<gccversion> -f Dockerfile.openmpi -t gmao/ubuntu20-openmpi:<mpiversion>-gcc_<gccversion> .
