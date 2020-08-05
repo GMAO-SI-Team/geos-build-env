@@ -13,7 +13,7 @@ RUN mkdir /bld && cd /bld && \
     tar zxvf ${myOpenMPI}.tar.gz && \
     cd ${myOpenMPI} && \
     ./configure --prefix=/opt/${myOpenMPI} --enable-static && \
-    make -j 8 && make install && \
+    make -j 8 && make install-strip && \
     cd / && \rm -rf /bld
 
 # Add ${myOpenMPI} to path
