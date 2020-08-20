@@ -11,7 +11,7 @@ ARG gccversion
 ARG mpiversion
 
 RUN apt-get update && \
-    apt-get install -y tcsh ksh && \
+    apt-get install -y tcsh ksh rsync && \
     rm -rf /var/lib/apt/lists/* && \
     cd / && \
     git clone https://github.com/ESMCI/manage_externals.git && \
