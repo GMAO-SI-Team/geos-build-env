@@ -8,45 +8,15 @@ FROM ${MPI_IMAGE}
 ARG gccversion
 ARG mpiversion
 ARG version
+
 # Get baselibs version at runtime
 ENV name_version ESMA-Baselibs-${version}
 ENV config gfortran_${gccversion}-openmpi_${mpiversion}
 
-# Python
-#COPY --from=continuumio/anaconda:latest /opt/conda /opt/conda
-#ENV PATH /opt/conda/bin:$PATH
-
 ENV rootloc /baselibs/${version}
 ENV baselibs_src ${rootloc}/${name_version}
 
-#ENV LANGUAGE        en_US.UTF-8
-#ENV LC_ALL          en_US.UTF-8
-#ENV LANG            en_US.UTF-8
-#ENV LC_TYPE         en_US.UTF-8
-
-# Needed so tzdata isn't interactive (installed by cmake)
-ENV DEBIAN_FRONTEND noninteractive
-
-# Note ssh needed by openmpi to run
-RUN apt-get update && \
-    apt-get install -y \
-       autoconf \
-       automake \
-       bison \
-       byacc \
-       cmake \
-       file \
-       flex \
-       git \
-       libexpat1-dev \
-       libtool \
-       python3 \
-       python3-yaml \
-       python3-distutils \
-       python3-numpy \
-       ssh \
-       && rm -rf /var/lib/apt/lists/* && \
-    git clone -b v${version} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
+RUN git clone -b v${version} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
     \cd ${baselibs_src} && \
     make -j8 install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 BUILD=ESSENTIALS CONFIG_SETUP=${config} 2>&1 |tee log.build && \
     make verify && \
@@ -54,8 +24,6 @@ RUN apt-get update && \
     cd / && \rm -rf ${baselibs_src}
 
 ENV BASEDIR ${rootloc}/x86_64-unknown-linux-gnu/${config}
-
-#CMD echo "BASEDIR: ${BASEDIR}"
 
 # Build command
 # > docker build --build-arg version=<baselibversion> --build-arg mpiversion=<mpiversion> --build-arg gccversion=<gccversion> -f Dockerfile.baselib -t gmao/ubuntu20-baselibs:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .

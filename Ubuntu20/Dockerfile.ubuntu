@@ -1,0 +1,39 @@
+FROM ubuntu:20.04
+
+# Needed so tzdata isn't interactive (installed by cmake)
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && \
+    apt-get install -y \
+       autoconf \
+       automake \
+       bison \
+       build-essential \
+       byacc \
+       cmake \
+       curl \
+       file \
+       flex \
+       git \
+       ksh \
+       libexpat1-dev \
+       libssl-dev \
+       libtool \
+       manpages-dev \
+       python \
+       python-numpy \
+       python3 \
+       python3-yaml \
+       python3-distutils \
+       python3-numpy \
+       rsync \
+       ssh \
+       tcsh \
+       wget && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py && \
+    python2 get-pip.py && \
+    pip install pandas
+
+# Build command
+# > docker build -f Dockerfile.ubuntu -t gmao/ubuntu20:<version> .

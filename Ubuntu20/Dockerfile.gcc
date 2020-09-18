@@ -1,15 +1,8 @@
-FROM ubuntu:20.04
+FROM gmao/ubuntu20-cmake:3.18.2
 
 ARG version
 
-RUN apt-get update && \
-    apt-get install -y \
-       build-essential \
-       curl \
-       manpages-dev \
-       wget && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir /src-gcc && cd /src-gcc && \
+RUN mkdir /src-gcc && cd /src-gcc && \
     curl -O https://ftp.gnu.org/gnu/gcc/gcc-${version}/gcc-${version}.tar.gz && \
     tar xzf gcc-${version}.tar.gz && \
     cd gcc-${version} && \
