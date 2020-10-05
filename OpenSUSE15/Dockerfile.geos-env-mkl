@@ -1,0 +1,41 @@
+# ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
+
+ARG version
+ARG gccversion
+ARG mpiversion
+ARG GEOS_ENV_IMAGE=gmao/opensuse15-geos-env:${version}-openmpi_${mpiversion}-gcc_${gccversion}
+FROM ${GEOS_ENV_IMAGE}
+
+ARG version
+ARG gccversion
+ARG mpiversion
+
+# MKL version 2020.0-088
+# https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html
+#
+# Based partly on https://gist.github.com/mgoldey/f3886b7accc0cd730e37528e09f7bc81
+#
+# https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+#
+RUN zypper -n addrepo -f https://yum.repos.intel.com/setup/intelproducts.repo && \
+    zypper -n --gpg-auto-import-keys install intel-mkl-2020.0-088 && \
+    (find /opt/intel -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
+    (find /opt/intel -name "examples" -type d -exec rm -rf {} \; || echo "removing examples") ; \
+    (find /opt/intel -name "benchmarks" -exec rm -rf {} \; || echo "removing benchmarks") ; \
+    (find /opt/intel -name "documentation*" -exec rm -rf {} \; || echo "removing documentation") ; \
+    (rm -rf /opt/intel/mkl/interfaces ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*.a ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*mpi*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*tbb*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*pgi*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*mc*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*blacs*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*scalapack*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*gf*.so ) ; \
+    (rm -rf /opt/intel/mkl/lib/intel64/*mic*.so ) ; \
+    zypper clean
+
+ENV MKLROOT /opt/intel/mkl
+
+# Build command
+# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-mkl -t gmao/opensuse15-geos-env-mkl:<version>-openmpi_<mpiversion>-gcc_<gccversion> .

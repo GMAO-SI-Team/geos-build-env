@@ -1,0 +1,37 @@
+FROM opensuse/leap:15.2
+
+# Needed so tzdata isn't interactive (installed by cmake)
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN zypper refresh && \
+    zypper -n install --type pattern devel_basis && \
+    zypper -n install \
+       autoconf \
+       automake \
+       bison \
+       byacc \
+       bzip2 \
+       cmake \
+       curl \
+       gcc \
+       gcc-c++ \
+       gcc-fortran \
+       git \
+       ksh \
+       libexpat-devel \
+       libopenssl-devel \
+       man \
+       python2 \
+       python2-numpy \
+       python2-pandas \
+       python3 \
+       python3-PyYAML \
+       python3-distutils-extra \
+       python3-numpy \
+       tcsh \
+       wget \
+       which && \
+   zypper clean
+
+# Build command
+# > docker build -f Dockerfile.opensuse -t gmao/opensuse:15.2 .
