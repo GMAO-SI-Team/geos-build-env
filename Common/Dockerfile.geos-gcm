@@ -1,0 +1,31 @@
+# GEOSgcm
+
+ARG osversion
+ARG baselibversion
+ARG mpiversion
+ARG gccversion
+
+ARG GEOS_IMAGE=gmao/${osversion}-geos-env-mkl:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+FROM ${GEOS_IMAGE}
+
+ARG gcmversion
+
+RUN git clone -b v${gcmversion} https://github.com/GEOS-ESM/GEOSgcm.git && \
+    cd GEOSgcm && \
+    mepo clone && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ && \
+    make -j install && \
+    cd .. && \
+    rm -rf build
+
+# Build command
+# > docker build --build-arg gcmversion=<gcmversion> --build-arg baselibversion=<baselibversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-gcm -t gmao/<osversion>-geos-gcm:x.y.z .
+#
+#   where (for example):
+#     <gcmversion> is "10.16.1"
+#     <baselibversion> is "6.0.16"
+#     <osversion> is "opensuse15" or "ubuntu20"
+#     <gccversion> is "10.2.0"
+#     <mpiversion> is "4.0.5"

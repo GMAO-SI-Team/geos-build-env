@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 
+ARG cmakeversion
+
 # Needed so tzdata isn't interactive (installed by cmake)
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -35,7 +37,22 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py && \
     python2 get-pip.py && \
-    pip install pandas
+    pip2 install pandas && \
+    python3 get-pip.py && \
+    pip3 install nose
+
+RUN mkdir /src-cmake && cd /src-cmake && \
+    wget https://github.com/Kitware/CMake/releases/download/v${cmakeversion}/cmake-${cmakeversion}.tar.gz && \
+    tar xzf cmake-${cmakeversion}.tar.gz && \
+    cd cmake-${cmakeversion} && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/cmake && \
+    make -j8 && \
+    make install && \
+    cd / && \
+    rm -rf /src-cmake
+
+ENV PATH /cmake/bin:${PATH}
 
 # Build command
-# > docker build -f Dockerfile.ubuntu -t gmao/ubuntu20:<version> .
+# > docker build --build-arg cmakeversion=x.y.z -f Dockerfile.ubuntu -t gmao/ubuntu20:<version> .

@@ -1,5 +1,7 @@
 FROM opensuse/leap:15.2
 
+ARG cmakeversion
+
 # Needed so tzdata isn't interactive (installed by cmake)
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -27,6 +29,7 @@ RUN zypper refresh && \
        python3 \
        python3-PyYAML \
        python3-distutils-extra \
+       python3-nose \
        python3-numpy \
        tcsh \
        wget \

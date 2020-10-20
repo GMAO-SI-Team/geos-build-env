@@ -1,0 +1,30 @@
+# Mepo and Manage externals
+
+ARG baselibversion
+ARG osversion
+ARG gccversion
+ARG mpiversion
+ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+FROM ${BASELIBS_IMAGE}
+
+ARG baselibversion
+ARG gccversion
+ARG mpiversion
+
+RUN cd / && \
+    git clone https://github.com/ESMCI/manage_externals.git && \
+    cd manage_externals && \
+    cd / && \
+    git clone https://github.com/GEOS-ESM/mepo.git && \
+    cd mepo
+
+ENV PATH /mepo:/manage_externals:$PATH
+
+# Build command
+# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-nomkl -t gmao/<osversion>-geos-env-nomkl:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+#
+#   where (for example):
+#     <baselibversion> is "6.0.16"
+#     <osversion> is "opensuse15" or "ubuntu20"
+#     <gccversion> is "10.2.0"
+#     <mpiversion> is "4.0.5"

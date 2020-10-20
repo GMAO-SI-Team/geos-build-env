@@ -1,12 +1,13 @@
 # ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
 
-ARG version
+ARG baselibversion
+ARG osversion
 ARG gccversion
 ARG mpiversion
-ARG GEOS_ENV_IMAGE=gmao/opensuse15-geos-env:${version}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
 FROM ${GEOS_ENV_IMAGE}
 
-ARG version
+ARG baselibversion
 ARG gccversion
 ARG mpiversion
 
@@ -38,4 +39,10 @@ RUN zypper -n addrepo -f https://yum.repos.intel.com/setup/intelproducts.repo &&
 ENV MKLROOT /opt/intel/mkl
 
 # Build command
-# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-mkl -t gmao/opensuse15-geos-env-mkl:<version>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg baselibversion=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+#
+#   where (for example):
+#     <baselibversion> is "6.0.16"
+#     <osversion> is "opensuse15" or "ubuntu20"
+#     <gccversion> is "10.2.0"
+#     <mpiversion> is "4.0.5"

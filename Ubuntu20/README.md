@@ -2,18 +2,11 @@
 
 ## Base Image
 
-This has all the `apt` commands:
+This has all the `apt` commands. It also build CMake as that is too old
+in Ubuntu 20:
 ```
-docker build -f Dockerfile.ubuntu -t gmao/ubuntu20:20.04 .
+docker build --cmakeversion=3.18.2 -f Dockerfile.ubuntu -t gmao/ubuntu20:20.04 .
 docker push gmao/ubuntu20:20.04
-```
-
-## CMake
-
-Ubuntu 20 has too old a CMake, so we build from source
-```
-docker build --build-arg version=3.18.2 -f Dockerfile.cmake -t gmao/ubuntu20-cmake:3.18.2 .
-docker push gmao/ubuntu20-cmake:3.18.2
 ```
 
 ## GCC

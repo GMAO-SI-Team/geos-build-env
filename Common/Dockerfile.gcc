@@ -1,0 +1,26 @@
+ARG  baseimage
+FROM gmao/${baseimage}
+
+ARG gccversion
+
+RUN mkdir /src-gcc && cd /src-gcc && \
+    curl -O https://ftp.gnu.org/gnu/gcc/gcc-${gccversion}/gcc-${gccversion}.tar.gz && \
+    tar xzf gcc-${gccversion}.tar.gz && \
+    cd gcc-${gccversion} && \
+    ./contrib/download_prerequisites && \
+    mkdir bld-gcc && cd bld-gcc && \
+    ../configure --prefix=/gcc --enable-languages=c,c++,fortran --disable-multilib && \
+    make -j 8 && \
+    make install-strip && \
+    rm -rf /src-gcc
+
+ENV PATH /gcc/bin:${PATH}
+ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+    
+# Build command
+# > docker build --build-arg gccversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.gcc -t gmao/<osversion>-gcc:<gccversion> .
+# 
+#   where (for example):
+#     <gccversion> is "10.2.0"
+#     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"
+#     <osversion> is "opensuse15" or "ubuntu20"

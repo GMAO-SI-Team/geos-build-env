@@ -1,17 +1,23 @@
 # ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
 
-ARG version
+ARG baselibversion
+ARG osversion
 ARG gccversion
 ARG mpiversion
-ARG GEOS_ENV_IMAGE=gmao/ubuntu20-geos-env:${version}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
 FROM ${GEOS_ENV_IMAGE}
 
-ARG version
+ARG baselibversion
 ARG gccversion
 ARG mpiversion
 
 # MKL version 2020.0-088
+# https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html
+#
 # Based partly on https://gist.github.com/mgoldey/f3886b7accc0cd730e37528e09f7bc81
+#
+# https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+#
 RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB 2> /dev/null | apt-key add - && \
     sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list' && \
     apt-get update && \
@@ -34,7 +40,14 @@ RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PR
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+
 ENV MKLROOT /opt/intel/mkl
 
 # Build command
-# > docker build --build-arg version=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-mkl -t gmao/ubuntu20-geos-env-mkl:<version>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg baselibversion=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+#
+#   where (for example):
+#     <baselibversion> is "6.0.16"
+#     <osversion> is "opensuse15" or "ubuntu20"
+#     <gccversion> is "10.2.0"
+#     <mpiversion> is "4.0.5"
