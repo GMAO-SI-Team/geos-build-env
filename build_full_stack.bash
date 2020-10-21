@@ -12,7 +12,7 @@ done
 SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
-needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
+needs_arg() { if [ -z "$OPTARG" ]; then die "Error: No arg for --$OPT option"; fi; }
 
 source ./versions.sh
 
@@ -104,7 +104,7 @@ while getopts hno:v-: OPT; do
     OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
   fi
   case "$OPT" in
-    o | os_version       ) needs_arg; OS_VERSION="$OPTARG"       ;;
+    o | os-version       ) needs_arg; OS_VERSION="$OPTARG"       ;;
 
         baselibs-version ) needs_arg; BASELIBS_VERSION="$OPTARG" ;;
         esmf-version     ) needs_arg; ESMF_VERSION="$OPTARG"     ;;
