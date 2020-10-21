@@ -10,7 +10,7 @@ FROM ${GEOS_IMAGE}
 
 ARG gcmversion
 
-RUN git clone -b v${gcmversion} https://github.com/GEOS-ESM/GEOSgcm.git && \
+RUN git clone -b ${gcmversion} https://github.com/GEOS-ESM/GEOSgcm.git && \
     cd GEOSgcm && \
     mepo clone && \
     mkdir build && \

@@ -14,7 +14,7 @@ SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "Error: No arg for --$OPT option"; fi; }
 
-source ./versions.sh
+source ${SCRIPTDIR}/versions.sh
 
 DEFAULT_DOCKER_REPO='gmao'
 DOCKER_REPO=${DEFAULT_DOCKER_REPO}
@@ -307,11 +307,11 @@ then
       --build-arg mpiversion=${OPENMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:1.0.6 .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:1.0.6
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}
    fi
 fi
 
@@ -325,10 +325,10 @@ then
       --build-arg mpiversion=${OPENMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:10.14.1 .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:10.14.1
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}
    fi
 fi
