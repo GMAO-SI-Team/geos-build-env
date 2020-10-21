@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# From http://stackoverflow.com/a/246128/1876449
+# ----------------------------------------------
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
 die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
 
@@ -16,7 +26,7 @@ usage () {
    REQUIRED:
       -o <osversion>|--os-version=<osversion>
          OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15)
-  
+
    BUILD OPTIONS:
       --build-base
          Build the Base Linux image
@@ -56,10 +66,10 @@ usage () {
       --fv3-version=<tag>
          Tag of FV3 Standalone to build (Default: ${FV3_VERSION}, useful only if --build-fv3 is on)
 
-   OTHER OPTIONS: 
+   OTHER OPTIONS:
       -h|--help
          Print this usage
-      -v|--verbose 
+      -v|--verbose
          Verbose
       -n|--dry-run
          Output the various settings and exit
