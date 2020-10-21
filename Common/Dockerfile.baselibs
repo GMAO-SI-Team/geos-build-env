@@ -11,22 +11,28 @@ ARG mpiversion
 ARG baselibversion
 
 # Get baselibs baselibversion at runtime
-ENV name_version ESMA-Baselibs-${baselibversion}
+ENV name_version ESMA-Baselibs
 ENV config gfortran_${gccversion}-openmpi_${mpiversion}
 
 ENV rootloc /baselibs/${baselibversion}
 ENV baselibs_src ${rootloc}/${name_version}
 
-RUN git clone -b v${baselibversion} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
+# The odd find command is because we want to preserve the esmf source
+# dir so that we can optionally run esmf tests
+RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
     \cd ${baselibs_src} && \
     make -j8 install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 BUILD=ESSENTIALS prefix=${rootloc}/${config}/Linux 2>&1 |tee log.build && \
-    make -j8 install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 ALLDIRS=nccmp prefix=${rootloc}/${config}/Linux 2>&1 |tee log.nccmp.build && \
+    make install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 ALLDIRS=nccmp prefix=${rootloc}/${config}/Linux 2>&1 |tee log.nccmp.build && \
     make verify && \
     mv log.* ${rootloc} && \
-    cd / && \rm -rf ${baselibs_src}
+    find ${baselibs_src} -mindepth 1 -maxdepth 1 -type d -not -name esmf -exec rm -rf '{}' \; && \
+    cd / 
 
 ENV BASEDIR ${rootloc}/${config}
 ENV PATH ${BASEDIR}/Linux/bin:${PATH}
+
+# Add script for testing ESMF in-place
+COPY bash-for-docker/esmf-test-Dockerfile.baselibs.bash /opt
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg mpiversion=<mpiversion> --build-arg gccversion=<gccversion> -f Dockerfile.baselib -t gmao/<osversion>-baselibs:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
