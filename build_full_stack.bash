@@ -12,7 +12,7 @@ done
 SCRIPTDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
-needs_arg() { if [ -z "$OPTARG" ]; then die "Error: No arg for --$OPT option"; fi; }
+needs_arg() { if [ -z "$OPTARG" ]; then die "Error: No arg for --$OPT option. Did you use an equals sign?"; fi; }
 
 source ${SCRIPTDIR}/versions.sh
 
