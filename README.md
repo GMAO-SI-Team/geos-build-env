@@ -41,13 +41,13 @@ $ ./build_full_stack.bash -h
 
    VERSION OPTIONS:
       --baselibs-version=<tag>
-         Tag of Baselibs to checkout (Default: v6.0.17)
+         Tag of Baselibs to checkout (Default: value in versions.sh)
       --esmf-version=<tag>
          Tag of ESMF submodule to checkout in Baselibs (Default: Tag in Baselibs being built)
       --gcm-version=<tag>
-         Tag of GCM to build (Default: 10.16.1, useful only if --build-gcm is on)
+         Tag of GCM to build (Default: value in versions.sh, useful only if --build-gcm is on)
       --fv3-version=<tag>
-         Tag of FV3 Standalone to build (Default: 1.1.0, useful only if --build-fv3 is on)
+         Tag of FV3 Standalone to build (Default: value in versions.sh, useful only if --build-fv3 is on)
 
    OTHER OPTIONS:
       -h|--help
