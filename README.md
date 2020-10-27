@@ -27,7 +27,7 @@ $ ./build_full_stack.bash -h
          Build the above images (images needed to build GEOSgcm)
 
       --build-gcm
-         Build the Base Linux image
+         Build the GCM image
       --build-fv3
          Build the FV3 Standalone image
 
