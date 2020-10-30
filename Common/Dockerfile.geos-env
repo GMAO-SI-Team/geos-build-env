@@ -21,7 +21,7 @@ RUN cd / && \
 ENV PATH /mepo:/manage_externals:$PATH
 
 # Build command
-# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env-nomkl -t gmao/<osversion>-geos-env-nomkl:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
 #
 #   where (for example):
 #     <baselibversion> is "6.0.16"
