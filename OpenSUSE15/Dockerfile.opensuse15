@@ -11,6 +11,7 @@ RUN zypper refresh && \
        autoconf \
        automake \
        bison \
+       blas-devel \
        byacc \
        bzip2 \
        cmake \
@@ -20,6 +21,7 @@ RUN zypper refresh && \
        gcc-fortran \
        git \
        ksh \
+       lapack-devel \
        libexpat-devel \
        libopenssl-devel \
        man \

@@ -18,7 +18,9 @@ RUN apt-get update && \
        flex \
        git \
        ksh \
+       libblas-dev \
        libexpat1-dev \
+       liblapack-dev \
        libssl-dev \
        libtool \
        manpages-dev \
