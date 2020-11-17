@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+#set -x
 
 # From http://stackoverflow.com/a/246128/1876449
 # ----------------------------------------------
@@ -38,6 +39,8 @@ usage () {
          Build the ESMA Baselibs image
       --build-env
          Build the GEOS Environment image
+      --build-bcs
+         Build the GEOS Environment image with BCs
       --build-mkl
          Build the Intel MKL image
       --build-all
@@ -92,6 +95,7 @@ BUILD_GCC=FALSE # GCC Image
 BUILD_MPI=FALSE # MPI Image
 BUILD_BSL=FALSE # Baselibs Image
 BUILD_ENV=FALSE # GEOS Enviroment (mepo and checkout_externals)
+BUILD_BCS=FALSE # BCS Image
 BUILD_MKL=FALSE # MKL
 BUILD_FV3=FALSE # FV3 Standalone
 BUILD_GCM=FALSE # GEOSgcm
@@ -110,6 +114,7 @@ while getopts hno:v-: OPT; do
         esmf-version     ) needs_arg; ESMF_VERSION="$OPTARG"     ;;
         gcm-version      ) needs_arg; GCM_VERSION="$OPTARG"      ;;
         fv3-version      ) needs_arg; FV3_VERSION="$OPTARG"      ;;
+        bcs-version      ) needs_arg; BCS_VERSION="$OPTARG"      ;;
 
         no-cache    ) NO_CACHE="--no-cache" ;;
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
@@ -121,6 +126,7 @@ while getopts hno:v-: OPT; do
         build-mpi ) BUILD_MPI=TRUE        ;;
         build-bsl ) BUILD_BSL=TRUE        ;;
         build-env ) BUILD_ENV=TRUE        ;;
+        build-bcs ) BUILD_BCS=TRUE        ;;
         build-mkl ) BUILD_MKL=TRUE        ;;
         build-gcm ) BUILD_GCM=TRUE        ;;
         build-fv3 ) BUILD_FV3=TRUE        ;;
@@ -154,18 +160,20 @@ then
 elif [[ "$OS_VERSION" == "opensuse15" ]]
 then
    BASE_IMAGE="opensuse:15.2"
-   OS_DOCKER_DIR="OpenSUSE15"
+   OS_DOCKER_DIR="${SCRIPTDIR}/OpenSUSE15"
 elif [[ "$OS_VERSION" == "ubuntu20" ]]
 then
    BASE_IMAGE="ubuntu:20.04"
-   OS_DOCKER_DIR="Ubuntu20"
+   OS_DOCKER_DIR="${SCRIPTDIR}/Ubuntu20"
 else
    echo "Invalid osversion!"
    usage
    exit 1
 fi
 
-COMMON_DOCKER_DIR="Common"
+COMMON_DOCKER_DIR="${SCRIPTDIR}/Common"
+ROOT_DIR=$(dirname ${SCRIPTDIR})
+echo $ROOT_DIR
 
 if [[ "$DRYRUN" == "TRUE" ]]
 then
@@ -177,6 +185,7 @@ then
    echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
    echo "  FV3_VERSION: ${FV3_VERSION}"
    echo "  GCM_VERSION: ${GCM_VERSION}"
+   echo "  BCS_VERSION: ${BCS_VERSION}"
    echo "  CMAKE_VERSION: ${CMAKE_VERSION}"
    echo "  ESMF_VERSION: ${ESMF_VERSION}"
    echo ""
@@ -186,6 +195,7 @@ then
    echo "  BUILD_MPI=${BUILD_MPI}"
    echo "  BUILD_BSL=${BUILD_BSL}"
    echo "  BUILD_ENV=${BUILD_ENV}"
+   echo "  BUILD_BCS=${BUILD_BCS}"
    echo "  BUILD_MKL=${BUILD_MKL}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
@@ -277,6 +287,23 @@ then
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
       docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}
+   fi
+fi
+
+## GEOS Build Env with BCs
+if [[ "$BUILD_BCS" == "TRUE" ]]
+then
+   docker build \
+      --build-arg baselibversion=${BASELIBS_VERSION} \
+      --build-arg gccversion=${GCC_VERSION} \
+      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}-bcs_${BCS_VERSION}
    fi
 fi
 
