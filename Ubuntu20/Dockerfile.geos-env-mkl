@@ -7,10 +7,6 @@ ARG mpiversion
 ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
 FROM ${GEOS_ENV_IMAGE}
 
-ARG baselibversion
-ARG gccversion
-ARG mpiversion
-
 # MKL version 2020.0-088
 # https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html
 #
