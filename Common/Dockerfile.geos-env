@@ -7,10 +7,6 @@ ARG mpiversion
 ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
 FROM ${BASELIBS_IMAGE}
 
-ARG baselibversion
-ARG gccversion
-ARG mpiversion
-
 RUN cd / && \
     git clone https://github.com/ESMCI/manage_externals.git && \
     cd manage_externals && \
