@@ -26,7 +26,7 @@ RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/
     if [ ! "x${esmfversion}" = "x" ]; then echo "Moving to ESMF ${esmfversion}" && cd esmf && git checkout ${esmfversion} && cd .. && git submodule status; fi && \
     make -j8 install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 BUILD=ESSENTIALS prefix=${rootloc}/${config}/Linux 2>&1 |tee log.build && \
     make install ESMF_COMM=openmpi ESMF_PYTHON=/usr/bin/python3 ALLDIRS=nccmp prefix=${rootloc}/${config}/Linux 2>&1 |tee log.nccmp.build && \
-    make verify && \
+    make verify ESMF_COMM=openmpi && \
     mv log.* ${rootloc} && \
     find ${baselibs_src} -mindepth 1 -maxdepth 1 -type d -not -name esmf -exec rm -rf '{}' \; && \
     cd /
