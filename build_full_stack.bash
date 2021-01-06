@@ -141,6 +141,11 @@ while getopts hno:v-: OPT; do
 done
 shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
+if [[ "$VERBOSE" == "TRUE" ]]
+then
+   set -x
+fi
+
 if [[ "$BUILD_ALL" == "TRUE" ]]
 then
    BUILD_BASE=TRUE # Base Image (Ubuntu or OpenSUSE)
@@ -298,8 +303,9 @@ then
       --build-arg gccversion=${GCC_VERSION} \
       --build-arg mpiversion=${OPENMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
+      --build-arg bcsversion=${BCS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}-bcs_${BCS_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
