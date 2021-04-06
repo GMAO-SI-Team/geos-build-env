@@ -26,7 +26,7 @@ usage () {
 
    REQUIRED:
       -o <osversion>|--os-version=<osversion>
-         OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15)
+         OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15, centos7)
 
    BUILD OPTIONS:
       --build-base
@@ -90,7 +90,7 @@ ESMF_VERSION=
 
 BUILD_ALL=FALSE
 
-BUILD_BASE=FALSE # Base Image (Ubuntu or OpenSUSE)
+BUILD_BASE=FALSE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 7)
 BUILD_GCC=FALSE # GCC Image
 BUILD_MPI=FALSE # MPI Image
 BUILD_BSL=FALSE # Baselibs Image
@@ -148,7 +148,7 @@ fi
 
 if [[ "$BUILD_ALL" == "TRUE" ]]
 then
-   BUILD_BASE=TRUE # Base Image (Ubuntu or OpenSUSE)
+   BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 7)
    BUILD_GCC=TRUE # GCC Image
    BUILD_MPI=TRUE # MPI Image
    BUILD_BSL=TRUE # Baselibs Image
@@ -170,6 +170,10 @@ elif [[ "$OS_VERSION" == "ubuntu20" ]]
 then
    BASE_IMAGE="ubuntu:20.04"
    OS_DOCKER_DIR="${SCRIPTDIR}/Ubuntu20"
+elif [[ "$OS_VERSION" == "centos7" ]]
+then
+   BASE_IMAGE="centos:7"
+   OS_DOCKER_DIR="${SCRIPTDIR}/Centos7"
 else
    echo "Invalid osversion!"
    usage
