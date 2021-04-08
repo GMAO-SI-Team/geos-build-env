@@ -1,0 +1,26 @@
+ARG  baseimage
+FROM gmao/${baseimage}
+
+ARG intelversion
+
+RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
+    sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list' && \
+    apt-get update && \
+    apt-get install -y intel-basekit intel-hpckit && \
+    apt-get clean autoclean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH /gcc/bin:${PATH}
+ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+ENV CC /gcc/bin/gcc
+ENV CXX /gcc/bin/g++
+ENV FC /gcc/bin/gfortran
+    
+# Build command
+# > docker build --build-arg intelversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.intel -t gmao/<osversion>-intel:<intelversion> .
+# 
+#   where (for example):
+#     <intelversion> is "10.2.0"
+#     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"
+#     <osversion> is "opensuse15" or "ubuntu20"
