@@ -3,9 +3,11 @@
 ARG osversion
 ARG baselibversion
 ARG mpiversion
-ARG gccversion
+ARG mpiname
+ARG compilerversion
+ARG compilername
 
-ARG GEOS_IMAGE=gmao/${osversion}-geos-env-mkl:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG GEOS_IMAGE=gmao/${osversion}-geos-env-mkl:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 FROM ${GEOS_IMAGE}
 
 ARG fv3version
@@ -15,15 +17,15 @@ RUN git clone -b ${fv3version} https://github.com/GEOS-ESM/GEOSfvdycore.git && \
     mepo init && mepo clone && \
     mkdir build && \
     cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX && \
     make -j install
 
 # Build command
-# > docker build --build-arg fv3version=<fv3version> --build-arg osversion=<osversion> --build-arg baselibversion=<baselibversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-fv3standalone -t gmao/<osversion>-geos-fv3standalone:<fv3version> .
+# > docker build --build-arg fv3version=<fv3version> --build-arg osversion=<osversion> --build-arg baselibversion=<baselibversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-fv3standalone -t gmao/<osversion>-geos-fv3standalone:<fv3version> .
 #
 #   where (for example):
 #     <fv3version> is "1.1.0"
 #     <baselibversion> is "6.0.16"
 #     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"

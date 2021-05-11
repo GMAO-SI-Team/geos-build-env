@@ -1,15 +1,19 @@
-# ESMA Baselibs and its dependencies (gcc, openmpi, anaconda)
+# ESMA Baselibs and its dependencies (compiler, mpi)
 
 ARG baselibversion
 ARG osversion
-ARG gccversion
+ARG compilerversion
+ARG compilername
 ARG mpiversion
-ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG mpiname
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 FROM ${GEOS_ENV_IMAGE}
 
 ARG baselibversion
-ARG gccversion
+ARG compilerversion
+ARG compilername
 ARG mpiversion
+ARG mpiname
 
 # MKL version 2020.0-088
 # https://software.intel.com/content/www/us/en/develop/articles/installing-intel-free-libs-and-python-yum-repo.html
@@ -40,10 +44,10 @@ RUN yum-config-manager --add-repo https://yum.repos.intel.com/setup/intelproduct
 ENV MKLROOT /opt/intel/mkl
 
 # Build command
-# > docker build --build-arg baselibversion=x.y.z --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg baselibversion=x.y.z --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
 #
 #   where (for example):
 #     <baselibversion> is "6.0.16"
 #     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"

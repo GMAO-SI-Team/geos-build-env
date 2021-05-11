@@ -26,14 +26,18 @@ usage () {
 
    REQUIRED:
       -o <osversion>|--os-version=<osversion>
-         OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15, centos7)
+         OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15, centos8)
+      --compiler=<compiler>
+         compiler to use (REQUIRED. Allowed values: intel, gnu)
 
    BUILD OPTIONS:
       --build-base
          Build the Base Linux image
+      --build-intel
+         Build the Intel Compiler and MPI image
       --build-gcc
          Build the GCC image
-      --build-mpi
+      --build-openmpi
          Build the Open MPI image
       --build-bsl
          Build the ESMA Baselibs image
@@ -88,17 +92,20 @@ DO_PUSH=FALSE
 OS_VERSION=UNKNOWN
 ESMF_VERSION=
 
+COMPILER=UNKNOWN
+
 BUILD_ALL=FALSE
 
-BUILD_BASE=FALSE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 7)
-BUILD_GCC=FALSE # GCC Image
-BUILD_MPI=FALSE # MPI Image
-BUILD_BSL=FALSE # Baselibs Image
-BUILD_ENV=FALSE # GEOS Enviroment (mepo and checkout_externals)
-BUILD_BCS=FALSE # BCS Image
-BUILD_MKL=FALSE # MKL
-BUILD_FV3=FALSE # FV3 Standalone
-BUILD_GCM=FALSE # GEOSgcm
+BUILD_BASE=FALSE  # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+BUILD_GCC=FALSE   # GCC Image
+BUILD_INTEL=FALSE # Intel Image
+BUILD_OPENMPI=FALSE   # MPI Image
+BUILD_BSL=FALSE   # Baselibs Image
+BUILD_ENV=FALSE   # GEOS Enviroment (mepo and checkout_externals)
+BUILD_BCS=FALSE   # BCS Image
+BUILD_MKL=FALSE   # MKL
+BUILD_FV3=FALSE   # FV3 Standalone
+BUILD_GCM=FALSE   # GEOSgcm
 
 while getopts hno:v-: OPT; do
   # support long options: https://stackoverflow.com/a/28466267/519360
@@ -109,6 +116,7 @@ while getopts hno:v-: OPT; do
   fi
   case "$OPT" in
     o | os-version       ) needs_arg; OS_VERSION="$OPTARG"       ;;
+        compiler         ) needs_arg; COMPILER="$OPTARG"         ;;
 
         baselibs-version ) needs_arg; BASELIBS_VERSION="$OPTARG" ;;
         esmf-version     ) needs_arg; ESMF_VERSION="$OPTARG"     ;;
@@ -120,16 +128,17 @@ while getopts hno:v-: OPT; do
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
         push        ) DO_PUSH=TRUE          ;;
 
-        build-all ) BUILD_ALL=TRUE        ;;
-        build-base) BUILD_BASE=TRUE       ;;
-        build-gcc ) BUILD_GCC=TRUE        ;;
-        build-mpi ) BUILD_MPI=TRUE        ;;
-        build-bsl ) BUILD_BSL=TRUE        ;;
-        build-env ) BUILD_ENV=TRUE        ;;
-        build-bcs ) BUILD_BCS=TRUE        ;;
-        build-mkl ) BUILD_MKL=TRUE        ;;
-        build-gcm ) BUILD_GCM=TRUE        ;;
-        build-fv3 ) BUILD_FV3=TRUE        ;;
+        build-all     ) BUILD_ALL=TRUE     ;;
+        build-base    ) BUILD_BASE=TRUE    ;;
+        build-gcc     ) BUILD_GCC=TRUE     ;;
+        build-intel   ) BUILD_INTEL=TRUE   ;;
+        build-openmpi ) BUILD_OPENMPI=TRUE ;;
+        build-bsl     ) BUILD_BSL=TRUE     ;;
+        build-env     ) BUILD_ENV=TRUE     ;;
+        build-bcs     ) BUILD_BCS=TRUE     ;;
+        build-mkl     ) BUILD_MKL=TRUE     ;;
+        build-gcm     ) BUILD_GCM=TRUE     ;;
+        build-fv3     ) BUILD_FV3=TRUE     ;;
 
     h | help     ) usage; exit  ;;
     n | dry-run  ) DRYRUN=TRUE  ;;
@@ -146,16 +155,6 @@ then
    set -x
 fi
 
-if [[ "$BUILD_ALL" == "TRUE" ]]
-then
-   BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 7)
-   BUILD_GCC=TRUE # GCC Image
-   BUILD_MPI=TRUE # MPI Image
-   BUILD_BSL=TRUE # Baselibs Image
-   BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
-   BUILD_MKL=TRUE # MKL
-fi
-
 # Check we have a valid os
 if [[ "$OS_VERSION" == "UNKNOWN" ]]
 then
@@ -170,13 +169,62 @@ elif [[ "$OS_VERSION" == "ubuntu20" ]]
 then
    BASE_IMAGE="ubuntu:20.04"
    OS_DOCKER_DIR="${SCRIPTDIR}/Ubuntu20"
-elif [[ "$OS_VERSION" == "centos7" ]]
+elif [[ "$OS_VERSION" == "centos8" ]]
 then
-   BASE_IMAGE="centos:7"
-   OS_DOCKER_DIR="${SCRIPTDIR}/Centos7"
+   BASE_IMAGE="centos:8"
+   OS_DOCKER_DIR="${SCRIPTDIR}/Centos8"
 else
    echo "Invalid osversion!"
    usage
+   exit 1
+fi
+
+# Check we have a valid compiler
+if [[ "$COMPILER" == "UNKNOWN" ]]
+then
+   echo "compiler must be passed in!"
+   usage
+   exit 1
+elif [[ "$COMPILER" == "intel" ]]
+then
+   COMPILER_NAME="intel"
+   COMPILER_VERSION=${INTEL_VERSION}
+   MPI_NAME="intelmpi"
+   MPI_VERSION=${INTEL_VERSION}
+elif [[ "$COMPILER" == "gnu" ]]
+then
+   COMPILER_NAME="gcc"
+   COMPILER_VERSION=${GCC_VERSION}
+   MPI_NAME="openmpi"
+   MPI_VERSION=${OPENMPI_VERSION}
+else
+   echo "Invalid compiler!"
+   usage
+   exit 1
+fi
+
+if [[ "$BUILD_ALL" == "TRUE" ]]
+then
+   if [[ "$COMPILER" == "intel" ]]
+   then
+      BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+      BUILD_INTEL=TRUE # Intel Compiler and MPI Image
+      BUILD_BSL=TRUE # Baselibs Image
+      BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
+   elif [[ "$COMPILER" == "gnu" ]]
+   then
+      BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+      BUILD_GCC=TRUE # GCC Image
+      BUILD_OPENMPI=TRUE # MPI Image
+      BUILD_BSL=TRUE # Baselibs Image
+      BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
+      BUILD_MKL=TRUE # MKL
+   fi
+fi
+
+if [[ "$COMPILER" == "intel" && "$BUILD_MKL" == "TRUE" ]]
+then
+   echo "ERROR! The Intel image already provides MKL"
    exit 1
 fi
 
@@ -190,6 +238,7 @@ then
    echo "  OS_VERSION: ${OS_VERSION}"
    echo "  BASE_IMAGE: ${BASE_IMAGE}"
    echo "  GCC_VERSION: ${GCC_VERSION}"
+   echo "  INTEL_VERSION: ${INTEL_VERSION}"
    echo "  OPENMPI_VERSION: ${OPENMPI_VERSION}"
    echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
    echo "  FV3_VERSION: ${FV3_VERSION}"
@@ -201,7 +250,8 @@ then
    echo "Build Options:"
    echo "  BUILD_BASE=${BUILD_BASE}"
    echo "  BUILD_GCC=${BUILD_GCC}"
-   echo "  BUILD_MPI=${BUILD_MPI}"
+   echo "  BUILD_INTEL=${BUILD_INTEL}"
+   echo "  BUILD_OPENMPI=${BUILD_OPENMPI}"
    echo "  BUILD_BSL=${BUILD_BSL}"
    echo "  BUILD_ENV=${BUILD_ENV}"
    echo "  BUILD_BCS=${BUILD_BCS}"
@@ -247,8 +297,24 @@ then
    fi
 fi
 
+## Intel
+if [[ "$BUILD_INTEL" == "TRUE" ]]
+then
+   docker build \
+      --build-arg baseimage=${BASE_IMAGE} \
+      --build-arg intelversion=${INTEL_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      -f ${OS_DOCKER_DIR}/Dockerfile.intel \
+      -t ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      docker push ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+   fi
+fi
+
 ## Open MPI
-if [[ "$BUILD_MPI" == "TRUE" ]]
+if [[ "$BUILD_OPENMPI" == "TRUE" ]]
 then
    docker build \
       --build-arg mpiversion=${OPENMPI_VERSION} \
@@ -268,17 +334,19 @@ if [[ "$BUILD_BSL" == "TRUE" ]]
 then
    docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       --build-arg esmfversion=${ESMF_VERSION} \
       ${NO_CACHE} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.baselibs \
-      -t ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
@@ -287,15 +355,17 @@ if [[ "$BUILD_ENV" == "TRUE" ]]
 then
    docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
@@ -304,16 +374,18 @@ if [[ "$BUILD_BCS" == "TRUE" ]]
 then
    docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       --build-arg bcsversion=${BCS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}-bcs_${BCS_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}-bcs_${BCS_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
    fi
 fi
 
@@ -322,15 +394,17 @@ if [[ "$BUILD_MKL" == "TRUE" ]]
 then
    docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-mkl \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-openmpi_${OPENMPI_VERSION}-gcc_${GCC_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
@@ -340,8 +414,10 @@ then
    docker build \
       --build-arg fv3version=${FV3_VERSION} \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION} .
@@ -358,8 +434,10 @@ then
    docker build \
       --build-arg gcmversion=${GCM_VERSION} \
       --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg gccversion=${GCC_VERSION} \
-      --build-arg mpiversion=${OPENMPI_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION} .

@@ -3,11 +3,13 @@
 ARG bcsversion
 ARG baselibversion
 ARG osversion
-ARG gccversion
+ARG compilerversion
+ARG compilername
 ARG mpiversion
+ARG mpiname
 
 ARG BCS_IMAGE=gmao/geos-bcs:${bcsversion}
-ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 
 FROM ${BCS_IMAGE} AS bcsimage
 
@@ -16,11 +18,11 @@ FROM ${GEOS_ENV_IMAGE}
 COPY --from=bcsimage /TinyBCs-GitV10 /TinyBCs-GitV10
 
 # Build command
-# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg bcsversion=<bcsversion> -f Dockerfile.geos-env-bcs -t gmao/<osversion>-geos-env-bcs:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion>-bcs_<bcsversion> .
+# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg bcsversion=<bcsversion> -f Dockerfile.geos-env-bcs -t gmao/<osversion>-geos-env-bcs:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion>-bcs_<bcsversion> .
 #
 #   where (for example):
 #     <baselibversion> is "v6.0.27"
 #     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"
 #     <bcsversion> is "v10.17.0"

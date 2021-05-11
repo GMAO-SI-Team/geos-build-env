@@ -17,14 +17,17 @@ ARG mpiversion
 ARG mpiname
 ARG intelversion
 
+COPY Centos8/oneAPI.repo /etc/yum.repos.d
+
 # MKL version oneAPI
 #
 # https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-using-package-managers/yum-dnf-zypper.html
 #
 # Based partly on https://gist.github.com/mgoldey/f3886b7accc0cd730e37528e09f7bc81
 #
-RUN zypper addrepo https://yum.repos.intel.com/oneapi oneAPI && \
-    zypper -n --gpg-auto-import-keys install intel-oneapi-mkl && \
+# https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+#
+RUN dnf -y install intel-oneapi-mkl && \
     (find /opt/intel/oneapi -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
     (find /opt/intel/oneapi -name "examples" -type d -exec rm -rf {} \; || echo "removing examples") ; \
     (find /opt/intel/oneapi -name "benchmarks" -exec rm -rf {} \; || echo "removing benchmarks") ; \
@@ -39,12 +42,12 @@ RUN zypper addrepo https://yum.repos.intel.com/oneapi oneAPI && \
     (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*scalapack*.so ) ; \
     (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*gf*.so ) ; \
     (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*mic*.so ) ; \
-    zypper clean
+    dnf clean all
 
 ENV MKLROOT /opt/intel/oneapi/mkl/latest
 
 # Build command
-# > docker build --build-arg baselibversion=x.y.z --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-${mpiname}_<mpiversion>-${compilername}_<compilerversion> .
+# > docker build --build-arg baselibversion=x.y.z --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
 #
 #   where (for example):
 #     <baselibversion> is "6.0.16"

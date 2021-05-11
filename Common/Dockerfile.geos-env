@@ -2,9 +2,11 @@
 
 ARG baselibversion
 ARG osversion
-ARG gccversion
+ARG compilername
+ARG compilerversion
+ARG mpiname
 ARG mpiversion
-ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}
+ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 FROM ${BASELIBS_IMAGE}
 
 RUN cd / && \
@@ -17,10 +19,10 @@ RUN cd / && \
 ENV PATH /mepo:/manage_externals:$PATH
 
 # Build command
-# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-openmpi_<mpiversion>-gcc_<gccversion> .
+# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
 #
 #   where (for example):
 #     <baselibversion> is "6.0.16"
 #     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"

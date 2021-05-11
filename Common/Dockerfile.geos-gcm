@@ -3,12 +3,14 @@
 ARG osversion
 ARG baselibversion
 ARG mpiversion
-ARG gccversion
+ARG mpiname
+ARG compilerversion
+ARG compilername
 ARG gcmversion
 
 # NOTE NOTE NOTE Assumes that the bcs version is identical to the gcm version
 
-ARG GEOS_ENV_BCS_IMAGE=gmao/${osversion}-geos-env-bcs:${baselibversion}-openmpi_${mpiversion}-gcc_${gccversion}-bcs_${gcmversion}
+ARG GEOS_ENV_BCS_IMAGE=gmao/${osversion}-geos-env-bcs:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}-bcs_${gcmversion}
 
 FROM ${GEOS_ENV_BCS_IMAGE}
 ARG gcmversion
@@ -18,17 +20,17 @@ RUN git clone -b ${gcmversion} https://github.com/GEOS-ESM/GEOSgcm.git && \
     mepo clone && \
     mkdir build && \
     cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX && \
     make -j install && \
     cd .. && \
     rm -rf build
 
 # Build command
-# > docker build --build-arg gcmversion=<gcmversion> --build-arg baselibversion=<baselibversion> --build-arg gccversion=<gccversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-gcm -t gmao/<osversion>-geos-gcm:x.y.z .
+# > docker build --build-arg gcmversion=<gcmversion> --build-arg baselibversion=<baselibversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-gcm -t gmao/<osversion>-geos-gcm:x.y.z .
 #
 #   where (for example):
 #     <gcmversion> is "v10.17.0"
 #     <baselibversion> is "v6.0.27"
 #     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"
