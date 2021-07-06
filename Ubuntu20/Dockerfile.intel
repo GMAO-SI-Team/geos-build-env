@@ -7,11 +7,12 @@ RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PR
     sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list' && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-      intel-oneapi-compiler-fortran \
-      intel-oneapi-mpi \
-      intel-oneapi-mkl \
-      intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic \
-      intel-oneapi-mpi-devel && \
+      intel-oneapi-compiler-fortran-${intelversion} \
+      intel-oneapi-mpi-${intelversion} \
+      intel-oneapi-mkl-${intelversion} \
+      intel-oneapi-mkl-devel-${intelversion} \
+      intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-${intelversion} \
+      intel-oneapi-mpi-devel-${intelversion} && \
     rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga && \
     rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/emu && \
     (find /opt/intel/oneapi -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
@@ -31,9 +32,9 @@ RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PR
     rm -rf /var/lib/apt/lists/*
 
 # These are grabbed by sourcing /opt/intel/oneapi/setvars.sh interactively
-ENV PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelversion}//bin:/opt/intel/oneapi/mkl/latest/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
+ENV PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
 
-ENV LD_LIBRARY_PATH /opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelversion}//lib/release:/opt/intel/oneapi/mpi/${intelversion}//lib:/opt/intel/oneapi/mkl/latest/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH /opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelversion}//lib/release:/opt/intel/oneapi/mpi/${intelversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
 
 # This was discovered by sourcing:
 #    . /opt/intel/oneapi/mpi/2021.2.0/env/vars.sh -ofi_internal=1
