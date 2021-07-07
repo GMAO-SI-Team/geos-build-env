@@ -7,9 +7,10 @@ ARG compilerversion
 ARG compilername
 ARG mpiversion
 ARG mpiname
+ARG imagename
 
 ARG BCS_IMAGE=gmao/geos-bcs:${bcsversion}
-ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-${imagename}:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 
 FROM ${BCS_IMAGE} AS bcsimage
 

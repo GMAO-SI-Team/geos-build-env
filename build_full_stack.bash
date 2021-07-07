@@ -191,12 +191,14 @@ then
    COMPILER_VERSION=${INTEL_VERSION}
    MPI_NAME="intelmpi"
    MPI_VERSION=${INTEL_VERSION}
+   FINAL_DOCKER_IMAGE_NAME="geos-env"
 elif [[ "$COMPILER" == "gnu" ]]
 then
    COMPILER_NAME="gcc"
    COMPILER_VERSION=${GCC_VERSION}
    MPI_NAME="openmpi"
    MPI_VERSION=${OPENMPI_VERSION}
+   FINAL_DOCKER_IMAGE_NAME="geos-env-mkl"
 else
    echo "Invalid compiler!"
    usage
@@ -380,6 +382,7 @@ then
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       --build-arg bcsversion=${BCS_VERSION} \
+      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION} .
 
@@ -419,6 +422,7 @@ then
       --build-arg compilername=${COMPILER_NAME} \
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
+      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION} .
 

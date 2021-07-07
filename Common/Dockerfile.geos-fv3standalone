@@ -6,8 +6,9 @@ ARG mpiversion
 ARG mpiname
 ARG compilerversion
 ARG compilername
+ARG imagename
 
-ARG GEOS_IMAGE=gmao/${osversion}-geos-env-mkl:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
+ARG GEOS_IMAGE=gmao/${osversion}-${imagename}:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 FROM ${GEOS_IMAGE}
 
 ARG fv3version
