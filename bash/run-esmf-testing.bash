@@ -130,6 +130,8 @@ then
    MPI_NAME="intelmpi"
    MPI_VERSION=${INTEL_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env"
+   ESMF_COMM="intelmpi"
+   ESMF_COMPILER="intel"
 elif [[ "$COMPILER" == "gnu" ]]
 then
    COMPILER_NAME="gcc"
@@ -137,6 +139,8 @@ then
    MPI_NAME="openmpi"
    MPI_VERSION=${OPENMPI_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env-mkl"
+   ESMF_COMM="openmpi"
+   ESMF_COMPILER="gfortran"
 else
    echo "Invalid compiler!"
    usage
@@ -173,7 +177,7 @@ fi
 
 bash ${PARENTDIR}/build_full_stack.bash --os-version=${OS_VERSION} --compiler=${COMPILER} --build-bsl --no-cache ${EXTRA_OPTIONS} 2>&1 | tee esmf_testing_build_full_stack.out
 
-[$(docker ps -a | grep runner)] && docker rm --force runner
-docker run --name runner --env-file=$ENV_FILE -dit ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_VERSION}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+[ "$(docker ps -a | grep runner)" ] && docker rm --force runner
+docker run --name runner --env ESMF_COMM=$ESMF_COMM --env ESMF_COMPILER=$ESMF_COMPILER --env-file=$ENV_FILE -dit ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
 docker exec -t runner bash "/opt/esmf-test-Dockerfile.baselibs.bash"
 docker stop runner
