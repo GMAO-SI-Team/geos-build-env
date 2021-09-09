@@ -13,13 +13,15 @@ FROM ${GEOS_IMAGE}
 
 ARG fv3version
 
-RUN git clone -b ${fv3version} https://github.com/GEOS-ESM/GEOSfvdycore.git && \
-    cd GEOSfvdycore && \
+RUN git clone -b ${fv3version} https://github.com/GEOS-ESM/GEOSfvdycore.git /GEOSfvdycore-src && \
+    cd /GEOSfvdycore-src && \
     mepo init && mepo clone && \
     mkdir build && \
     cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=../install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX && \
-    make -j install
+    cmake .. -DCMAKE_INSTALL_PREFIX=/GEOSfvdycore/install -DBASEDIR=$BASEDIR/Linux -DUSE_F2PY=OFF -DCMAKE_Fortran_COMPILER=$FC -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX && \
+    make -j install/strip && \
+    cd / && \
+    rm -rf /GEOSfvdycore-src
 
 # Build command
 # > docker build --build-arg fv3version=<fv3version> --build-arg osversion=<osversion> --build-arg baselibversion=<baselibversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-fv3standalone -t gmao/<osversion>-geos-fv3standalone:<fv3version> .
