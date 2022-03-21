@@ -96,16 +96,16 @@ COMPILER=UNKNOWN
 
 BUILD_ALL=FALSE
 
-BUILD_BASE=FALSE  # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
-BUILD_GCC=FALSE   # GCC Image
-BUILD_INTEL=FALSE # Intel Image
-BUILD_OPENMPI=FALSE   # MPI Image
-BUILD_BSL=FALSE   # Baselibs Image
-BUILD_ENV=FALSE   # GEOS Enviroment (mepo and checkout_externals)
-BUILD_BCS=FALSE   # BCS Image
-BUILD_MKL=FALSE   # MKL
-BUILD_FV3=FALSE   # FV3 Standalone
-BUILD_GCM=FALSE   # GEOSgcm
+BUILD_BASE=FALSE    # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+BUILD_GCC=FALSE     # GCC Image
+BUILD_INTEL=FALSE   # Intel Image
+BUILD_OPENMPI=FALSE # MPI Image
+BUILD_BSL=FALSE     # Baselibs Image
+BUILD_ENV=FALSE     # GEOS Enviroment (mepo and checkout_externals)
+BUILD_BCS=FALSE     # BCS Image
+BUILD_MKL=FALSE     # MKL
+BUILD_FV3=FALSE     # FV3 Standalone
+BUILD_GCM=FALSE     # GEOSgcm
 
 while getopts hno:v-: OPT; do
   # support long options: https://stackoverflow.com/a/28466267/519360
@@ -424,11 +424,11 @@ then
       --build-arg osversion=${OS_VERSION} \
       --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
@@ -444,10 +444,10 @@ then
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION} .
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi

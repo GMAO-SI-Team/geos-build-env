@@ -10,7 +10,7 @@ ENV myOpenMPI openmpi-${mpiversion}
 
 # Download and build ${myOpenMPI}
 RUN mkdir /bld && cd /bld && \
-    wget https://download.open-mpi.org/release/open-mpi/v4.0/${myOpenMPI}.tar.gz && \
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/${myOpenMPI}.tar.gz && \
     tar zxvf ${myOpenMPI}.tar.gz && \
     cd ${myOpenMPI} && \
     ./configure --prefix=/opt/${myOpenMPI} --enable-static && \
