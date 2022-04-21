@@ -102,8 +102,8 @@ BUILD_INTEL=FALSE   # Intel Image
 BUILD_OPENMPI=FALSE # MPI Image
 BUILD_BSL=FALSE     # Baselibs Image
 BUILD_ENV=FALSE     # GEOS Enviroment (mepo and checkout_externals)
-BUILD_BCS=FALSE     # BCS Image
 BUILD_MKL=FALSE     # MKL
+BUILD_BCS=FALSE     # BCS Image
 BUILD_FV3=FALSE     # FV3 Standalone
 BUILD_GCM=FALSE     # GEOSgcm
 
@@ -135,8 +135,8 @@ while getopts hno:v-: OPT; do
         build-openmpi ) BUILD_OPENMPI=TRUE ;;
         build-bsl     ) BUILD_BSL=TRUE     ;;
         build-env     ) BUILD_ENV=TRUE     ;;
-        build-bcs     ) BUILD_BCS=TRUE     ;;
         build-mkl     ) BUILD_MKL=TRUE     ;;
+        build-bcs     ) BUILD_BCS=TRUE     ;;
         build-gcm     ) BUILD_GCM=TRUE     ;;
         build-fv3     ) BUILD_FV3=TRUE     ;;
 
@@ -256,8 +256,8 @@ then
    echo "  BUILD_OPENMPI=${BUILD_OPENMPI}"
    echo "  BUILD_BSL=${BUILD_BSL}"
    echo "  BUILD_ENV=${BUILD_ENV}"
-   echo "  BUILD_BCS=${BUILD_BCS}"
    echo "  BUILD_MKL=${BUILD_MKL}"
+   echo "  BUILD_BCS=${BUILD_BCS}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
    echo ""
@@ -371,6 +371,25 @@ then
    fi
 fi
 
+## GEOS Build Env with MKL
+if [[ "$BUILD_MKL" == "TRUE" ]]
+then
+   docker build \
+      --build-arg baselibversion=${BASELIBS_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-mkl \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+   fi
+fi
+
 ## GEOS Build Env with BCs
 if [[ "$BUILD_BCS" == "TRUE" ]]
 then
@@ -389,25 +408,6 @@ then
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
       docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
-   fi
-fi
-
-## GEOS Build Env with MKL
-if [[ "$BUILD_MKL" == "TRUE" ]]
-then
-   docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-mkl \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
-   then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
