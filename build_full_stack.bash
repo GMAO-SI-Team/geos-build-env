@@ -232,7 +232,7 @@ fi
 
 COMMON_DOCKER_DIR="${SCRIPTDIR}/Common"
 ROOT_DIR=$(dirname ${SCRIPTDIR})
-echo $ROOT_DIR
+#echo $ROOT_DIR
 
 if [[ "$DRYRUN" == "TRUE" ]]
 then
@@ -265,28 +265,38 @@ then
    echo "  DO_PUSH: ${DO_PUSH}"
    echo "  DOCKER_REPO: ${DOCKER_REPO}"
    echo "  NO_CACHE: ${NO_CACHE}"
-
-   exit
+   echo ""
+   echo "Commands that will run:"
+   echo ""
 fi
+
+doCmd() {
+  if [[ "$DRYRUN" == "TRUE" ]]
+  then 
+     echo "$@"
+  else
+     "$@"
+  fi
+}
 
 ## Base Image
 if [[ "$BUILD_BASE" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg cmakeversion=${CMAKE_VERSION} \
       -f ${OS_DOCKER_DIR}/Dockerfile.${OS_VERSION} \
       -t ${DOCKER_REPO}/${BASE_IMAGE} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${BASE_IMAGE}
+      doCmd docker push ${DOCKER_REPO}/${BASE_IMAGE}
    fi
 fi
 
 ## GCC
 if [[ "$BUILD_GCC" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg gccversion=${GCC_VERSION} \
       --build-arg osversion=${OS_VERSION} \
@@ -295,14 +305,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-gcc:${GCC_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-gcc:${GCC_VERSION}
    fi
 fi
 
 ## Intel
 if [[ "$BUILD_INTEL" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg intelversion=${INTEL_VERSION} \
       --build-arg osversion=${OS_VERSION} \
@@ -311,14 +321,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
 ## Open MPI
 if [[ "$BUILD_OPENMPI" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg mpiversion=${OPENMPI_VERSION} \
       --build-arg gccversion=${GCC_VERSION} \
       --build-arg osversion=${OS_VERSION} \
@@ -327,14 +337,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-openmpi:${OPENMPI_VERSION}-gcc_${GCC_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-openmpi:${OPENMPI_VERSION}-gcc_${GCC_VERSION}
    fi
 fi
 
 ## Baselibs
 if [[ "$BUILD_BSL" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
       --build-arg mpiversion=${MPI_VERSION} \
@@ -348,14 +358,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
 ## GEOS Build Env
 if [[ "$BUILD_ENV" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
       --build-arg mpiversion=${MPI_VERSION} \
@@ -367,14 +377,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
 ## GEOS Build Env with MKL
 if [[ "$BUILD_MKL" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
       --build-arg mpiversion=${MPI_VERSION} \
@@ -386,14 +396,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
 ## GEOS Build Env with BCs
 if [[ "$BUILD_BCS" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
       --build-arg mpiversion=${MPI_VERSION} \
@@ -407,14 +417,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
    fi
 fi
 
 ## FV3 Standalone
 if [[ "$BUILD_FV3" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg fv3version=${FV3_VERSION} \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
@@ -428,14 +438,14 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
 ## GEOSgcm
 if [[ "$BUILD_GCM" == "TRUE" ]]
 then
-   docker build \
+   doCmd docker build \
       --build-arg gcmversion=${GCM_VERSION} \
       --build-arg baselibversion=${BASELIBS_VERSION} \
       --build-arg mpiname=${MPI_NAME} \
@@ -448,6 +458,6 @@ then
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
