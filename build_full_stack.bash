@@ -51,7 +51,7 @@ usage () {
          Build the above images (images needed to build GEOSgcm)
 
       --build-gcm
-         Build the Base Linux image
+         Build the GEOSgcm image
       --build-fv3
          Build the FV3 Standalone image
 
