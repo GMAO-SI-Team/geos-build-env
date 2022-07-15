@@ -15,7 +15,8 @@ RUN mkdir /src-gcc && cd /src-gcc && \
     rm -rf /src-gcc
 
 ENV PATH /gcc/bin:${PATH}
-ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+#THIS WORKED WEIRDLY ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
+ENV LD_LIBRARY_PATH /gcc/lib64:${LD_LIBRARY_PATH}
 ENV CC /gcc/bin/gcc
 ENV CXX /gcc/bin/g++
 ENV FC /gcc/bin/gfortran
