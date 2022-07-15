@@ -46,6 +46,9 @@ RUN apt-get update && \
     python3 get-pip.py && \
     pip3 install nose
 
+
+# NOTE If you move to Ubuntu 22, this cannot be done here. For library reasons, you'd need to build with
+#      with the GCC you build later. But, Ubuntu 22 does have a new-ish cmake
 RUN mkdir /src-cmake && cd /src-cmake && \
     wget https://github.com/Kitware/CMake/releases/download/v${cmakeversion}/cmake-${cmakeversion}.tar.gz && \
     tar xzf cmake-${cmakeversion}.tar.gz && \
