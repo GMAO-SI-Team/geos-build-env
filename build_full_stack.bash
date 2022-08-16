@@ -190,7 +190,7 @@ then
    COMPILER_NAME="intel"
    COMPILER_VERSION=${INTEL_VERSION}
    MPI_NAME="intelmpi"
-   MPI_VERSION=${INTEL_VERSION}
+   MPI_VERSION=${INTELMPI_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env"
 elif [[ "$COMPILER" == "gnu" ]]
 then
@@ -241,6 +241,7 @@ then
    echo "  BASE_IMAGE: ${BASE_IMAGE}"
    echo "  GCC_VERSION: ${GCC_VERSION}"
    echo "  INTEL_VERSION: ${INTEL_VERSION}"
+   echo "  INTELMPI_VERSION: ${INTELMPI_VERSION}"
    echo "  OPENMPI_VERSION: ${OPENMPI_VERSION}"
    echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
    echo "  FV3_VERSION: ${FV3_VERSION}"
@@ -315,6 +316,7 @@ then
    doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg intelversion=${INTEL_VERSION} \
+      --build-arg intelmpiversion=${INTELMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${OS_DOCKER_DIR}/Dockerfile.intel \
       -t ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .

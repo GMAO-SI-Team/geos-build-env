@@ -2,17 +2,18 @@ ARG  baseimage
 FROM gmao/${baseimage}
 
 ARG intelversion
+ARG intelmpiversion
 
 RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
     sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list' && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
       intel-oneapi-compiler-fortran-${intelversion} \
-      intel-oneapi-mpi-${intelversion} \
+      intel-oneapi-mpi-${intelmpiversion} \
       intel-oneapi-mkl-${intelversion} \
       intel-oneapi-mkl-devel-${intelversion} \
       intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic-${intelversion} \
-      intel-oneapi-mpi-devel-${intelversion} && \
+      intel-oneapi-mpi-devel-${intelmpiversion} && \
     rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga && \
     rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/emu && \
     (find /opt/intel/oneapi -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
@@ -32,25 +33,26 @@ RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PR
     rm -rf /var/lib/apt/lists/*
 
 # These are grabbed by sourcing /opt/intel/oneapi/setvars.sh interactively
-ENV PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
+ENV PATH /opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelmpiversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
 
-ENV LD_LIBRARY_PATH /opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelversion}//lib/release:/opt/intel/oneapi/mpi/${intelversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH /opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelmpiversion}//lib/release:/opt/intel/oneapi/mpi/${intelmpiversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
 
 # This was discovered by sourcing:
 #    . /opt/intel/oneapi/mpi/2021.2.0/env/vars.sh -ofi_internal=1
-ENV FI_PROVIDER_PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/lib/prov:/usr/lib64/libfabric
+ENV FI_PROVIDER_PATH /opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib/prov:/usr/lib64/libfabric
 
 ENV CC /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icc
 ENV CXX /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icpc
 ENV FC /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/ifort
 
-ENV I_MPI_ROOT /opt/intel/oneapi/mpi/${intelversion}
+ENV I_MPI_ROOT /opt/intel/oneapi/mpi/${intelmpiversion}
 ENV MKLROOT /opt/intel/oneapi/mkl/${intelversion}
     
 # Build command
-# > docker build --build-arg intelversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.intel -t gmao/<osversion>-intel:<intelversion> .
+# > docker build --build-arg intelversion=x.y.z --build-arg intelmpiversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.intel -t gmao/<osversion>-intel:<intelversion> .
 # 
 #   where (for example):
-#     <intelversion> is "10.2.0"
+#     <intelversion> is "2022.1.0"
+#     <intelmpiversion> is "2022.1.0"
 #     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"
 #     <osversion> is "opensuse15" or "ubuntu20"
