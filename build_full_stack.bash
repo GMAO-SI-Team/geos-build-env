@@ -55,6 +55,9 @@ usage () {
       --build-fv3
          Build the FV3 Standalone image
 
+      --static-esmf
+         Build with static ESMF libs
+
    DOCKER OPTIONS:
       --push
          Push Images to Docker Hub
@@ -106,6 +109,7 @@ BUILD_MKL=FALSE     # MKL
 BUILD_BCS=FALSE     # BCS Image
 BUILD_FV3=FALSE     # FV3 Standalone
 BUILD_GCM=FALSE     # GEOSgcm
+STATIC_ESMF=FALSE   # Static ESMF libraries
 
 while getopts hno:v-: OPT; do
   # support long options: https://stackoverflow.com/a/28466267/519360
@@ -139,6 +143,7 @@ while getopts hno:v-: OPT; do
         build-bcs     ) BUILD_BCS=TRUE     ;;
         build-gcm     ) BUILD_GCM=TRUE     ;;
         build-fv3     ) BUILD_FV3=TRUE     ;;
+        static-esmf   ) STATIC_ESMF=TRUE   ;;
 
     h | help     ) usage; exit  ;;
     n | dry-run  ) DRYRUN=TRUE  ;;
@@ -153,6 +158,13 @@ shift $((OPTIND-1)) # remove parsed options and args from $@ list
 if [[ "$VERBOSE" == "TRUE" ]]
 then
    set -x
+fi
+
+if [[ "$STATIC_ESMF" == "TRUE" ]]
+then
+   STATIC_ESMF_SUFFIX='-staticesmf'
+else
+   STATIC_ESMF_SUFFIX=''
 fi
 
 # Check we have a valid os
@@ -261,6 +273,7 @@ then
    echo "  BUILD_BCS=${BUILD_BCS}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
+   echo "  STATIC_ESMF=${STATIC_ESMF}"
    echo ""
    echo "Docker Options:"
    echo "  DO_PUSH: ${DO_PUSH}"
@@ -435,12 +448,12 @@ then
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
+      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone${STATIC_ESMF_SUFFIX} \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone${STATIC_ESMF_SUFFIX}:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone${STATIC_ESMF_SUFFIX}:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
@@ -455,11 +468,11 @@ then
       --build-arg compilername=${COMPILER_NAME} \
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
+      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm${STATIC_ESMF_SUFFIX} \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm${STATIC_ESMF_SUFFIX}:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm${STATIC_ESMF_SUFFIX}:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
