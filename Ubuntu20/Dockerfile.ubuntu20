@@ -25,6 +25,7 @@ RUN apt-get update && \
        libssl-dev \
        libtool \
        manpages-dev \
+       ninja-build \
        python \
        python-numpy \
        python3 \
