@@ -10,13 +10,9 @@ ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-${mpiname}_${mpi
 FROM ${BASELIBS_IMAGE}
 
 RUN cd / && \
-    git clone https://github.com/ESMCI/manage_externals.git && \
-    cd manage_externals && \
-    cd / && \
-    git clone https://github.com/GEOS-ESM/mepo.git && \
-    cd mepo
+    git clone https://github.com/GEOS-ESM/mepo.git
 
-ENV PATH /mepo:/manage_externals:$PATH
+ENV PATH /mepo:$PATH
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
