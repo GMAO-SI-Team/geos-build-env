@@ -20,10 +20,12 @@ RUN apt-get update && \
        git \
        ksh \
        libblas-dev \
+       libcurl4-gnutls-dev \
        libexpat1-dev \
        liblapack-dev \
        libssl-dev \
        libtool \
+       libxml2-dev \
        manpages-dev \
        ninja-build \
        python \
