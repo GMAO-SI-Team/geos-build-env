@@ -37,6 +37,7 @@ RUN apt-get update && \
        rsync \
        ssh \
        tcsh \
+       texinfo \
        tree \
        wget && \
     apt-get clean autoclean && \

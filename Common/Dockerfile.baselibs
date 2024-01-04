@@ -22,8 +22,6 @@ ENV config ${compilername}_${compilerversion}-${mpiname}_${mpiversion}
 ENV rootloc /baselibs/${baselibversion}
 ENV baselibs_src ${rootloc}/${name_version}
 
-# The odd find command is because we want to preserve the esmf source
-# dir so that we can optionally run esmf tests
 RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
     \cd ${baselibs_src} && \
     git submodule status && \
@@ -33,14 +31,12 @@ RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/
     make install ESMF_COMM=${mpiname} ESMF_PYTHON=/usr/bin/python3 ALLDIRS=FLAP prefix=${rootloc}/${config}/Linux 2>&1 |tee log.FLAP.build && \
     make verify ESMF_COMM=${mpiname} && \
     mv log.* ${rootloc} && \
-    find ${baselibs_src} -mindepth 1 -maxdepth 1 -type d -not -name esmf -exec rm -rf '{}' \; && \
-    cd /
+    cd / && \
+    rm -rf ${baselibs_src}
 
 ENV BASEDIR ${rootloc}/${config}
 ENV PATH ${BASEDIR}/Linux/bin:${PATH}
-
-# Add script for testing ESMF in-place
-COPY bash-for-docker/esmf-test-Dockerfile.baselibs.bash /opt
+ENV UDUNITS2_XML_PATH ${BASEDIR}/Linux/share/udunits/udunits2.xml
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg mpiversion=<mpiversion> --build-arg compilerversion=<compilerversion> -f Dockerfile.baselib -t gmao/<osversion>-baselibs:<baselibversion>-${mpiname}_<mpiversion>-${compilername}_<compilerversion> .
