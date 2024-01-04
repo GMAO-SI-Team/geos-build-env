@@ -1,9 +1,9 @@
 #!/bin/bash
 
-CMAKE_VERSION=3.26.4
+CMAKE_VERSION=3.27.4
 
 GCC_VERSION=12.1.0
-OPENMPI_VERSION=4.1.4
+OPENMPI_VERSION=5.0.0
 
 # There is a weird issue where Intel doesn't
 # have an Intel MPI 2022.1 on the apt server
