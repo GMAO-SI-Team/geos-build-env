@@ -44,7 +44,7 @@ RUN dnf -y install intel-oneapi-mkl && \
     (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*mic*.so ) ; \
     dnf clean all
 
-ENV MKLROOT /opt/intel/oneapi/mkl/latest
+ENV MKLROOT=/opt/intel/oneapi/mkl/latest
 
 # Build command
 # > docker build --build-arg baselibversion=x.y.z --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .

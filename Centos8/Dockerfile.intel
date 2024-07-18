@@ -15,21 +15,21 @@ RUN dnf -y install \
     dnf clean all
 
 # These are grabbed by sourcing /opt/intel/oneapi/setvars.sh interactively
-ENV PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/llvm/aocl-bin:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
+ENV PATH=/opt/intel/oneapi/mpi/${intelversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/llvm/aocl-bin:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/linux/bin:/opt/intel/oneapi/compiler/${intelversion}/linux/ioc/bin:${PATH}
 
-ENV LD_LIBRARY_PATH /opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelversion}//lib/release:/opt/intel/oneapi/mpi/${intelversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/emu:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/host/linux64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/linux64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelversion}//lib/release:/opt/intel/oneapi/mpi/${intelversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/x64:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/emu:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/host/linux64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga/linux64/lib:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/linux/compiler/lib:${LD_LIBRARY_PATH}
 
 # This was discovered by sourcing:
 #    . /opt/intel/oneapi/mpi/2021.2.0/env/vars.sh -ofi_internal=1
-ENV FI_PROVIDER_PATH /opt/intel/oneapi/mpi/${intelversion}//libfabric/lib/prov:/usr/lib64/libfabric
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/${intelversion}//libfabric/lib/prov:/usr/lib64/libfabric
 
-ENV CC /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icc
-ENV CXX /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icpc
-ENV FC /opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/ifort
+ENV CC=/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icc
+ENV CXX=/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/icpc
+ENV FC=/opt/intel/oneapi/compiler/${intelversion}/linux/bin/intel64/ifort
 
-ENV I_MPI_ROOT /opt/intel/oneapi/mpi/${intelversion}
-ENV MKLROOT /opt/intel/oneapi/mkl/${intelversion}
-    
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/${intelversion}
+ENV MKLROOT=/opt/intel/oneapi/mkl/${intelversion}
+
 # Build command
 # > docker build --build-arg intelversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.intel -t gmao/<osversion>-intel:<intelversion> .
 # 
