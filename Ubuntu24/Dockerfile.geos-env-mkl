@@ -1,0 +1,49 @@
+# ESMA Baselibs and its dependencies (compiler, mpi)
+
+ARG baselibversion
+ARG osversion
+ARG compilerversion
+ARG compilername
+ARG mpiversion
+ARG mpiname
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-geos-env:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
+FROM ${GEOS_ENV_IMAGE}
+
+# Need to move to MKL from oneapi
+#
+RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
+    apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository "deb https://apt.repos.intel.com/oneapi all main" && \
+    apt-get update && \
+    apt-get install -y intel-oneapi-mkl intel-oneapi-mkl-devel && \
+    (rm -rf /opt/intel/compiler ) ; \
+    (rm -rf /opt/intel/tcm ) ; \
+    (rm -rf /opt/intel/tbb ) ; \
+    (find /opt/intel -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
+    (find /opt/intel -name "examples" -type d -exec rm -rf {} \; || echo "removing examples") ; \
+    (find /opt/intel -name "benchmarks" -exec rm -rf {} \; || echo "removing benchmarks") ; \
+    (find /opt/intel -name "documentation*" -exec rm -rf {} \; || echo "removing documentation") ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*.a ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*mpi*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*tbb*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*pgi*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*mc*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*blacs*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*scalapack*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*sycl*.so* ) ; \
+    apt-get clean autoclean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+
+ENV MKLROOT /opt/intel/oneapi/mkl/latest
+
+# Build command
+# > docker build --build-arg baselibversion=x.y.z --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> -f Dockerfile.geos-env-mkl -t gmao/<osversion>-geos-env-mkl:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
+#
+#   where (for example):
+#     <baselibversion> is "6.0.16"
+#     <osversion> is "opensuse15" or "ubuntu20"
+#     <compilerversion> is "10.2.0"
+#     <mpiversion> is "4.0.5"

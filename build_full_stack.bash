@@ -26,7 +26,7 @@ usage () {
 
    REQUIRED:
       -o <osversion>|--os-version=<osversion>
-         OS version to build (REQUIRED. Allowed values: ubuntu20, opensuse15, centos8)
+         OS version to build (REQUIRED. Allowed values: ubuntu20, ubuntu24, opensuse15, centos8)
       --compiler=<compiler>
          compiler to use (REQUIRED. Allowed values: intel, gnu)
 
@@ -96,7 +96,7 @@ COMPILER=UNKNOWN
 
 BUILD_ALL=FALSE
 
-BUILD_BASE=FALSE    # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+BUILD_BASE=FALSE    # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
 BUILD_GCC=FALSE     # GCC Image
 BUILD_INTEL=FALSE   # Intel Image
 BUILD_OPENMPI=FALSE # MPI Image
@@ -169,6 +169,10 @@ elif [[ "$OS_VERSION" == "ubuntu20" ]]
 then
    BASE_IMAGE="ubuntu:20.04"
    OS_DOCKER_DIR="${SCRIPTDIR}/Ubuntu20"
+elif [[ "$OS_VERSION" == "ubuntu24" ]]
+then
+   BASE_IMAGE="ubuntu:24.04"
+   OS_DOCKER_DIR="${SCRIPTDIR}/Ubuntu24"
 elif [[ "$OS_VERSION" == "centos8" ]]
 then
    BASE_IMAGE="centos:8"
@@ -209,13 +213,13 @@ if [[ "$BUILD_ALL" == "TRUE" ]]
 then
    if [[ "$COMPILER" == "intel" ]]
    then
-      BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+      BUILD_BASE=TRUE # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
       BUILD_INTEL=TRUE # Intel Compiler and MPI Image
       BUILD_BSL=TRUE # Baselibs Image
       BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
    elif [[ "$COMPILER" == "gnu" ]]
    then
-      BUILD_BASE=TRUE # Base Image (Ubuntu 20, OpenSUSE 15, CentOS 8)
+      BUILD_BASE=TRUE # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
       BUILD_GCC=TRUE # GCC Image
       BUILD_OPENMPI=TRUE # MPI Image
       BUILD_BSL=TRUE # Baselibs Image
