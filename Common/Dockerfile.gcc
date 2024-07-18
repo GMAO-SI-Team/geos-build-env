@@ -14,16 +14,16 @@ RUN mkdir /src-gcc && cd /src-gcc && \
     make install-strip && \
     rm -rf /src-gcc
 
-ENV PATH /gcc/bin:${PATH}
-#THIS WORKED WEIRDLY ENV LD_LIBRARY_PATH /gcc/lib64:${PATH}
-ENV LD_LIBRARY_PATH /gcc/lib64:${LD_LIBRARY_PATH}
-ENV CC /gcc/bin/gcc
-ENV CXX /gcc/bin/g++
-ENV FC /gcc/bin/gfortran
-    
+ENV PATH=/gcc/bin:${PATH}
+#THIS WORKED WEIRDLY ENV LD_LIBRARY_PATH=/gcc/lib64:${PATH}
+ENV LD_LIBRARY_PATH=/gcc/lib64:${LD_LIBRARY_PATH}
+ENV CC=/gcc/bin/gcc
+ENV CXX=/gcc/bin/g++
+ENV FC=/gcc/bin/gfortran
+
 # Build command
 # > docker build --build-arg gccversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.gcc -t gmao/<osversion>-gcc:<gccversion> .
-# 
+#
 #   where (for example):
 #     <gccversion> is "10.2.0"
 #     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"

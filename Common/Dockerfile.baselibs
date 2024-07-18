@@ -16,11 +16,11 @@ ARG baselibversion
 ARG esmfversion
 
 # Get baselibs baselibversion at runtime
-ENV name_version ESMA-Baselibs
-ENV config ${compilername}_${compilerversion}-${mpiname}_${mpiversion}
+ENV name_version=ESMA-Baselibs
+ENV config=${compilername}_${compilerversion}-${mpiname}_${mpiversion}
 
-ENV rootloc /baselibs/${baselibversion}
-ENV baselibs_src ${rootloc}/${name_version}
+ENV rootloc=/baselibs/${baselibversion}
+ENV baselibs_src=${rootloc}/${name_version}
 
 RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/GEOS-ESM/ESMA-Baselibs.git ${baselibs_src} && \
     \cd ${baselibs_src} && \
@@ -33,9 +33,9 @@ RUN git clone -b ${baselibversion} -j 8 --recurse-submodules https://github.com/
     cd / && \
     rm -rf ${baselibs_src}
 
-ENV BASEDIR ${rootloc}/${config}
-ENV PATH ${BASEDIR}/Linux/bin:${PATH}
-ENV UDUNITS2_XML_PATH ${BASEDIR}/Linux/share/udunits/udunits2.xml
+ENV BASEDIR=${rootloc}/${config}
+ENV PATH=${BASEDIR}/Linux/bin:${PATH}
+ENV UDUNITS2_XML_PATH=${BASEDIR}/Linux/share/udunits/udunits2.xml
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg mpiversion=<mpiversion> --build-arg compilerversion=<compilerversion> -f Dockerfile.baselib -t gmao/<osversion>-baselibs:<baselibversion>-${mpiname}_<mpiversion>-${compilername}_<compilerversion> .

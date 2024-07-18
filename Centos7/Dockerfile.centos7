@@ -3,7 +3,7 @@ FROM centos:7
 ARG cmakeversion
 
 # Needed so tzdata isn't interactive (installed by cmake)
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN yum -y install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm && \
     yum -y install epel-release && \

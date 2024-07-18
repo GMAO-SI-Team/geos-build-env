@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ARG cmakeversion
 
 # Needed so tzdata isn't interactive (installed by cmake)
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y \
@@ -64,7 +64,7 @@ RUN mkdir /src-cmake && cd /src-cmake && \
     cd / && \
     rm -rf /src-cmake
 
-ENV PATH /cmake/bin:${PATH}
+ENV PATH=/cmake/bin:${PATH}
 
 # Build command
 # > docker build --build-arg cmakeversion=x.y.z -f Dockerfile.ubuntu -t gmao/ubuntu20:<version> .
