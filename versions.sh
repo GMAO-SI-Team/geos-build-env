@@ -8,6 +8,8 @@ OPENMPI_VERSION=5.0.2
 # Note Intel 2024.1 apt image seems to have
 # an issue with omp_lib: https://community.intel.com/t5/Intel-Fortran-Compiler/After-upgrading-ifort-no-longer-finds-include-dir-for-OpenMP/m-p/1602472
 INTEL_VERSION=2024.2
+IFX_VERSION=2024.2
+IFORT_VERSION=2021.13
 INTELMPI_VERSION=2021.13
 
 BASELIBS_VERSION='v8.5.0'
