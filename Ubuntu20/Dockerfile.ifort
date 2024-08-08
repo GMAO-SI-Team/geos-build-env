@@ -1,0 +1,63 @@
+ARG  baseimage
+FROM gmao/${baseimage}
+
+ARG intelversion
+ARG ifortversion
+ARG intelmpiversion
+
+RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
+    sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list' && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      intel-oneapi-compiler-fortran-${intelversion} \
+      intel-oneapi-mpi-${intelmpiversion} \
+      intel-oneapi-mkl-${intelversion} \
+      intel-oneapi-mkl-devel-${intelversion} \
+      intel-oneapi-compiler-dpcpp-cpp-${intelversion} \
+      intel-oneapi-mpi-devel-${intelmpiversion} && \
+    rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/oclfpga && \
+    rm -rf /opt/intel/oneapi/compiler/${intelversion}/linux/lib/emu && \
+    (find /opt/intel/oneapi -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
+    (find /opt/intel/oneapi -name "examples" -type d -exec rm -rf {} \; || echo "removing examples") ; \
+    (find /opt/intel/oneapi -name "benchmarks" -exec rm -rf {} \; || echo "removing benchmarks") ; \
+    (find /opt/intel/oneapi -name "documentation*" -exec rm -rf {} \; || echo "removing documentation") ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*.a ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*mpi*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*tbb*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*pgi*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*blacs*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*scalapack*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*gf*.so* ) ; \
+    (rm -rf /opt/intel/oneapi/mkl/${intelversion}/lib/intel64/*sycl*.so* ) ; \
+    apt-get clean autoclean && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# These are grabbed by sourcing /opt/intel/oneapi/setvars.sh interactively
+ENV PATH=/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/bin:/opt/intel/oneapi/mpi/${intelmpiversion}//bin:/opt/intel/oneapi/mkl/${intelversion}/bin/intel64:/opt/intel/oneapi/dev-utilities/${intelversion}/bin:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/bin:/opt/intel/oneapi/compiler/${intelversion}/bin/intel64:/opt/intel/oneapi/compiler/${intelversion}/bin:/opt/intel/oneapi/compiler/${intelversion}/ioc/bin:${PATH}
+
+ENV LD_LIBRARY_PATH=/opt/intel/oneapi/tbb/${intelversion}/env/../lib/intel64/gcc4.8:/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib:/opt/intel/oneapi/mpi/${intelmpiversion}//lib/release:/opt/intel/oneapi/mpi/${intelmpiversion}//lib:/opt/intel/oneapi/mkl/${intelversion}/lib/intel64:/opt/intel/oneapi/debugger/10.1.1/dep/lib:/opt/intel/oneapi/debugger/10.1.1/libipt/intel64/lib:/opt/intel/oneapi/debugger/10.1.1/gdb/intel64/lib:/opt/intel/oneapi/compiler/${intelversion}/lib:/opt/intel/oneapi/compiler/${intelversion}/lib/:/opt/intel/oneapi/compiler/${intelversion}/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/${intelversion}/compiler/lib:${LD_LIBRARY_PATH}
+
+# This was discovered by sourcing:
+#    . /opt/intel/oneapi/mpi/2021.2.0/env/vars.sh -ofi_internal=1
+ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib/prov:/usr/lib64/libfabric
+
+ENV CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
+ENV CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
+ENV FC=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+
+ENV I_MPI_CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
+ENV I_MPI_CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
+ENV I_MPI_F90=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+
+ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/${intelmpiversion}
+ENV MKLROOT=/opt/intel/oneapi/mkl/${intelversion}
+
+# Build command
+# > docker build --build-arg intelversion=x.y.z --build-arg intelmpiversion=x.y.z --build-arg baseimage=<baseimage> --build-arg osversion=<osversion> -f Dockerfile.intel -t gmao/<osversion>-intel:<intelversion> .
+# 
+#   where (for example):
+#     <intelversion> is "2024.1"
+#     <intelmpiversion> is "2021.12"
+#     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"
+#     <osversion> is "opensuse15" or "ubuntu20"

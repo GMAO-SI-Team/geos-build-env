@@ -2,6 +2,7 @@ ARG  baseimage
 FROM gmao/${baseimage}
 
 ARG intelversion
+ARG ifxversion
 ARG intelmpiversion
 
 RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
@@ -43,11 +44,11 @@ ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib/pro
 
 ENV CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
 ENV CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
-ENV FC=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+ENV FC=/opt/intel/oneapi/compiler/${intelversion}/bin/ifx
 
 ENV I_MPI_CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
 ENV I_MPI_CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
-ENV I_MPI_F90=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+ENV I_MPI_F90=/opt/intel/oneapi/compiler/${intelversion}/bin/ifx
 
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/${intelmpiversion}
 ENV MKLROOT=/opt/intel/oneapi/mkl/${intelversion}
