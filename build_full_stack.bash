@@ -423,6 +423,7 @@ then
       --build-arg compilername=${COMPILER_NAME} \
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
+      --build-arg mepoversion=${MEPO_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
