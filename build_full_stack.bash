@@ -28,13 +28,15 @@ usage () {
       -o <osversion>|--os-version=<osversion>
          OS version to build (REQUIRED. Allowed values: ubuntu20, ubuntu24, opensuse15, centos8)
       --compiler=<compiler>
-         compiler to use (REQUIRED. Allowed values: intel, gnu)
+         compiler to use (REQUIRED. Allowed values: ifort, ifx, gnu)
 
    BUILD OPTIONS:
       --build-base
          Build the Base Linux image
-      --build-intel
-         Build the Intel Compiler and MPI image
+      --build-ifx
+         Build the ifx Compiler and MPI image
+      --build-ifort
+         Build the ifort Compiler and MPI image
       --build-gcc
          Build the GCC image
       --build-openmpi
@@ -98,7 +100,8 @@ BUILD_ALL=FALSE
 
 BUILD_BASE=FALSE    # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
 BUILD_GCC=FALSE     # GCC Image
-BUILD_INTEL=FALSE   # Intel Image
+BUILD_IFX=FALSE     # ifx Image
+BUILD_IFORT=FALSE   # Ifort Image
 BUILD_OPENMPI=FALSE # MPI Image
 BUILD_BSL=FALSE     # Baselibs Image
 BUILD_ENV=FALSE     # GEOS Enviroment (mepo and checkout_externals)
@@ -131,7 +134,8 @@ while getopts hno:v-: OPT; do
         build-all     ) BUILD_ALL=TRUE     ;;
         build-base    ) BUILD_BASE=TRUE    ;;
         build-gcc     ) BUILD_GCC=TRUE     ;;
-        build-intel   ) BUILD_INTEL=TRUE   ;;
+        build-ifx     ) BUILD_IFX=TRUE     ;;
+        build-ifort   ) BUILD_IFORT=TRUE   ;;
         build-openmpi ) BUILD_OPENMPI=TRUE ;;
         build-bsl     ) BUILD_BSL=TRUE     ;;
         build-env     ) BUILD_ENV=TRUE     ;;
@@ -189,10 +193,17 @@ then
    echo "compiler must be passed in!"
    usage
    exit 1
-elif [[ "$COMPILER" == "intel" ]]
+elif [[ "$COMPILER" == "ifx" ]]
 then
-   COMPILER_NAME="intel"
-   COMPILER_VERSION=${INTEL_VERSION}
+   COMPILER_NAME="ifx"
+   COMPILER_VERSION=${IFX_VERSION}
+   MPI_NAME="intelmpi"
+   MPI_VERSION=${INTELMPI_VERSION}
+   FINAL_DOCKER_IMAGE_NAME="geos-env"
+elif [[ "$COMPILER" == "ifort" ]]
+then
+   COMPILER_NAME="ifort"
+   COMPILER_VERSION=${IFORT_VERSION}
    MPI_NAME="intelmpi"
    MPI_VERSION=${INTELMPI_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env"
@@ -211,10 +222,16 @@ fi
 
 if [[ "$BUILD_ALL" == "TRUE" ]]
 then
-   if [[ "$COMPILER" == "intel" ]]
+   if [[ "$COMPILER" == "ifx" ]]
    then
       BUILD_BASE=TRUE # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
-      BUILD_INTEL=TRUE # Intel Compiler and MPI Image
+      BUILD_IFX=TRUE # ifx Compiler and MPI Image
+      BUILD_BSL=TRUE # Baselibs Image
+      BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
+   elif [[ "$COMPILER" == "ifort" ]]
+   then
+      BUILD_BASE=TRUE # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
+      BUILD_IFORT=TRUE # Ifort Compiler and MPI Image
       BUILD_BSL=TRUE # Baselibs Image
       BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
    elif [[ "$COMPILER" == "gnu" ]]
@@ -234,6 +251,12 @@ then
    exit 1
 fi
 
+if [[ "$COMPILER" == "ifort" && "$BUILD_MKL" == "TRUE" ]]
+then
+   echo "ERROR! The Intel ifort image already provides MKL"
+   exit 1
+fi
+
 COMMON_DOCKER_DIR="${SCRIPTDIR}/Common"
 ROOT_DIR=$(dirname ${SCRIPTDIR})
 #echo $ROOT_DIR
@@ -245,6 +268,8 @@ then
    echo "  BASE_IMAGE: ${BASE_IMAGE}"
    echo "  GCC_VERSION: ${GCC_VERSION}"
    echo "  INTEL_VERSION: ${INTEL_VERSION}"
+   echo "  IFX_VERSION: ${IFX_VERSION}"
+   echo "  IFORT_VERSION: ${IFORT_VERSION}"
    echo "  INTELMPI_VERSION: ${INTELMPI_VERSION}"
    echo "  OPENMPI_VERSION: ${OPENMPI_VERSION}"
    echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
@@ -257,7 +282,8 @@ then
    echo "Build Options:"
    echo "  BUILD_BASE=${BUILD_BASE}"
    echo "  BUILD_GCC=${BUILD_GCC}"
-   echo "  BUILD_INTEL=${BUILD_INTEL}"
+   echo "  BUILD_IFX=${BUILD_IFX}"
+   echo "  BUILD_IFORT=${BUILD_IFORT}"
    echo "  BUILD_OPENMPI=${BUILD_OPENMPI}"
    echo "  BUILD_BSL=${BUILD_BSL}"
    echo "  BUILD_ENV=${BUILD_ENV}"
@@ -314,15 +340,34 @@ then
    fi
 fi
 
-## Intel
-if [[ "$BUILD_INTEL" == "TRUE" ]]
+## ifx
+if [[ "$BUILD_IFX" == "TRUE" ]]
 then
    doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg intelversion=${INTEL_VERSION} \
+      --build-arg ifxversion=${IFX_VERSION} \
       --build-arg intelmpiversion=${INTELMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
-      -f ${OS_DOCKER_DIR}/Dockerfile.intel \
+      -f ${OS_DOCKER_DIR}/Dockerfile.ifx \
+      -t ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+   fi
+fi
+
+## ifort
+if [[ "$BUILD_IFORT" == "TRUE" ]]
+then
+   doCmd docker build \
+      --build-arg baseimage=${BASE_IMAGE} \
+      --build-arg intelversion=${INTEL_VERSION} \
+      --build-arg ifortversion=${IFORT_VERSION} \
+      --build-arg intelmpiversion=${INTELMPI_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      -f ${OS_DOCKER_DIR}/Dockerfile.ifort \
       -t ${DOCKER_REPO}/${OS_VERSION}-${MPI_NAME}:${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
@@ -378,6 +423,7 @@ then
       --build-arg compilername=${COMPILER_NAME} \
       --build-arg compilerversion=${COMPILER_VERSION} \
       --build-arg osversion=${OS_VERSION} \
+      --build-arg mepoversion=${MEPO_VERSION} \
       -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
 
