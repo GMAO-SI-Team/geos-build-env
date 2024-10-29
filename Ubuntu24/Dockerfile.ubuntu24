@@ -28,8 +28,6 @@ RUN apt-get update && \
        libxml2-dev \
        manpages-dev \
        ninja-build \
-       python \
-       python-numpy \
        python3 \
        python3-yaml \
        python3-distutils \
@@ -43,26 +41,10 @@ RUN apt-get update && \
     apt-get clean autoclean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
-    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip2.py && \
-    python2 get-pip2.py && \
-    pip2 install pandas && \
     curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py && \
     python3 get-pip.py && \
     pip3 install nose
 
-
-# NOTE If you move to Ubuntu 22, this cannot be done here. For library reasons, you'd need to build with
-#      with the GCC you build later. But, Ubuntu 22 does have a new-ish cmake
-RUN mkdir /src-cmake && cd /src-cmake && \
-    wget https://github.com/Kitware/CMake/releases/download/v${cmakeversion}/cmake-${cmakeversion}.tar.gz && \
-    tar xzf cmake-${cmakeversion}.tar.gz && \
-    cd cmake-${cmakeversion} && \
-    mkdir build && cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=/cmake && \
-    make -j8 && \
-    make install && \
-    cd / && \
-    rm -rf /src-cmake
 
 ENV PATH=/cmake/bin:${PATH}
 
