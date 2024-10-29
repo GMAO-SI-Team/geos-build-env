@@ -1,9 +1,9 @@
 #!/bin/bash
 
-CMAKE_VERSION=3.29.1
+CMAKE_VERSION=3.30.5
 
-GCC_VERSION=13.2.0
-OPENMPI_VERSION=5.0.2
+GCC_VERSION=14.2.0
+OPENMPI_VERSION=5.0.5
 
 # Note Intel 2024.1 apt image seems to have
 # an issue with omp_lib: https://community.intel.com/t5/Intel-Fortran-Compiler/After-upgrading-ifort-no-longer-finds-include-dir-for-OpenMP/m-p/1602472
