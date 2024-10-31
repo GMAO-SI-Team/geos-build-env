@@ -5,6 +5,17 @@ ARG cmakeversion
 # Needed so tzdata isn't interactive (installed by cmake)
 ENV DEBIAN_FRONTEND=noninteractive
 
+# NOTE We have issues with python3.12 and ifort
+#      so we install python3.11 by hand and not these
+#      packages
+#
+#      pipx \
+#      python3 \
+#      python3-nose \
+#      python3-numpy \
+#      python3-pandas \
+#      python3-yaml \
+
 RUN apt-get update && \
     apt-get install -y \
        autoconf \
@@ -24,29 +35,31 @@ RUN apt-get update && \
        libexpat1-dev \
        liblapack-dev \
        libssl-dev \
+       libtirpc-dev \
        libtool \
        libxml2-dev \
        manpages-dev \
        ninja-build \
-       python3 \
-       python3-yaml \
-       python3-distutils \
-       python3-numpy \
        rsync \
        ssh \
        tcsh \
        texinfo \
        tree \
        wget && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-distutils python3.11-venv python3.11-dev && \
     apt-get clean autoclean && \
     apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py && \
-    python3 get-pip.py && \
-    pip3 install nose
+    rm -rf /var/lib/apt/lists/*
 
+RUN python3.11 -m venv /venv && \
+    /venv/bin/pip install nose numpy pandas pyyaml mepo && \
+    ln -s /venv/bin/f2py /venv/bin/f2py3 && \
+    ln -s /venv/bin/f2py /venv/bin/f2py3.11
 
-ENV PATH=/cmake/bin:${PATH}
+ENV PATH=/venv/bin:${PATH}
 
 # Build command
 # > docker build --build-arg cmakeversion=x.y.z -f Dockerfile.ubuntu -t gmao/ubuntu24:<version> .

@@ -11,8 +11,10 @@ FROM ${BASELIBS_IMAGE}
 
 ARG mepoversion
 
-RUN cd / && \
-    git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
+#RUN cd / && \
+    #git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
+
+RUN pipx install mepo
 
 ENV PATH=/mepo:$PATH
 
