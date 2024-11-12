@@ -23,7 +23,7 @@ COPY --from=bcsimage /TinyBCs-GitV12 /TinyBCs-GitV12
 #
 #   where (for example):
 #     <baselibversion> is "v8.5.0"
-#     <osversion> is "opensuse15" or "ubuntu20"
+#     <osversion> is "opensuse15" or "ubuntu24"
 #     <compilerversion> is "13.2.0"
 #     <mpiversion> is "5.0.2"
 #     <bcsversion> is "v12.0.0"

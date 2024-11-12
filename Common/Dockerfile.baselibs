@@ -41,8 +41,8 @@ ENV UDUNITS2_XML_PATH=${BASEDIR}/Linux/share/udunits/udunits2.xml
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg mpiversion=<mpiversion> --build-arg compilerversion=<compilerversion> -f Dockerfile.baselib -t gmao/<osversion>-baselibs:<baselibversion>-${mpiname}_<mpiversion>-${compilername}_<compilerversion> .
 #
 #   where (for example):
-#     <baselibversion> is "6.0.16"
-#     <osversion> is "opensuse15" or "ubuntu20"
+#     <baselibversion> is "8.7.0"
+#     <osversion> is "opensuse15" or "ubuntu24"
 #     <compilername> is "intel" or "gcc"
-#     <compilerversion> is "10.2.0"
-#     <mpiversion> is "4.0.5"
+#     <compilerversion> is "14.2.0"
+#     <mpiversion> is "5.0.5"
