@@ -16,7 +16,7 @@ FROM ${BCS_IMAGE} AS bcsimage
 
 FROM ${GEOS_ENV_IMAGE}
 
-COPY --from=bcsimage /TinyBCs-GitV12 /TinyBCs-GitV12
+COPY --from=bcsimage /TinyBCs-GitV10 /TinyBCs-GitV10
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg bcsversion=<bcsversion> -f Dockerfile.geos-env-bcs -t gmao/<osversion>-geos-env-bcs:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion>-bcs_<bcsversion> .
@@ -26,4 +26,4 @@ COPY --from=bcsimage /TinyBCs-GitV12 /TinyBCs-GitV12
 #     <osversion> is "opensuse15" or "ubuntu24"
 #     <compilerversion> is "13.2.0"
 #     <mpiversion> is "5.0.2"
-#     <bcsversion> is "v12.0.0"
+#     <bcsversion> is "v11.6.0"
