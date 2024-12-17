@@ -25,5 +25,5 @@ COPY --from=bcsimage /TinyBCs-GitV10 /TinyBCs-GitV10
 #     <baselibversion> is "v8.5.0"
 #     <osversion> is "opensuse15" or "ubuntu24"
 #     <compilerversion> is "13.2.0"
-#     <mpiversion> is "5.0.2"
+#     <mpiversion> is "5.0.5"
 #     <bcsversion> is "v11.6.0"
