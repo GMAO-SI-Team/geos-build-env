@@ -14,9 +14,9 @@ ARG mepoversion
 #RUN cd / && \
     #git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
 
+ENV PIPX_BIN_DIR=/root/.local/bin
 RUN pipx install mepo
-
-ENV PATH=/mepo:$PATH
+ENV PATH=${PIPX_BIN_DIR}:${PATH}
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
