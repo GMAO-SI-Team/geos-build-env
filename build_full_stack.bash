@@ -205,7 +205,10 @@ then
    COMPILER_NAME="ifort"
    COMPILER_VERSION=${IFORT_VERSION}
    MPI_NAME="intelmpi"
-   MPI_VERSION=${INTELMPI_VERSION}
+   # We hardcode the ifort intelmpi version as
+   # it is "stable" and will never change
+   # unlike ifx
+   MPI_VERSION="2021.13"
    FINAL_DOCKER_IMAGE_NAME="geos-env"
 elif [[ "$COMPILER" == "gnu" ]]
 then
