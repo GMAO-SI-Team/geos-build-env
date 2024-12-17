@@ -2,7 +2,6 @@ ARG  baseimage
 FROM gmao/${baseimage}
 
 ARG intelversion
-ARG ifortversion
 ARG intelmpiversion
 
 RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
