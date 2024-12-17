@@ -44,6 +44,6 @@ ENV MKLROOT=/opt/intel/oneapi/mkl/latest
 #
 #   where (for example):
 #     <baselibversion> is "6.0.16"
-#     <osversion> is "opensuse15" or "ubuntu20"
+#     <osversion> is "opensuse15" or "ubuntu24"
 #     <compilerversion> is "10.2.0"
 #     <mpiversion> is "4.0.5"

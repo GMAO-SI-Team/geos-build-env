@@ -31,6 +31,6 @@ RUN git clone -b ${gcmversion} https://github.com/GEOS-ESM/GEOSgcm.git /GEOSgcm-
 #   where (for example):
 #     <gcmversion> is "v10.17.0"
 #     <baselibversion> is "v6.0.27"
-#     <osversion> is "opensuse15" or "ubuntu20"
-#     <compilerversion> is "10.2.0"
-#     <mpiversion> is "4.0.5"
+#     <osversion> is "opensuse15" or "ubuntu24"
+#     <compilerversion> is "14.2.0"
+#     <mpiversion> is "5.0.5"

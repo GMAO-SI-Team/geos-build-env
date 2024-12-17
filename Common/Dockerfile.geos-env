@@ -11,16 +11,18 @@ FROM ${BASELIBS_IMAGE}
 
 ARG mepoversion
 
-RUN cd / && \
-    git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
+#RUN cd / && \
+    #git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
 
-ENV PATH=/mepo:$PATH
+ENV PIPX_BIN_DIR=/root/.local/bin
+RUN pipx install mepo
+ENV PATH=${PIPX_BIN_DIR}:${PATH}
 
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
 #
 #   where (for example):
-#     <baselibversion> is "6.0.16"
-#     <osversion> is "opensuse15" or "ubuntu20"
-#     <compilerversion> is "10.2.0"
-#     <mpiversion> is "4.0.5"
+#     <baselibversion> is "8.7.0"
+#     <osversion> is "opensuse15" or "ubuntu24"
+#     <compilerversion> is "14.2.0"
+#     <mpiversion> is "5.0.5"

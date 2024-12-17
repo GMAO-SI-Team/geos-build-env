@@ -26,6 +26,6 @@ ENV LD_LIBRARY_PATH=/opt/${myOpenMPI}/lib:$LD_LIBRARY_PATH
 # > docker build --build-arg mpiversion=<mpiversion> --build-arg osversion=<osversion> --build-arg gccversion=<gccversion> -f Dockerfile.openmpi -t gmao/<osversion>-openmpi:<mpiversion>-gcc_<gccversion> .
 #
 #   where (for example):
-#     <mpiversion> is "4.0.5"
-#     <osversion> is "opensuse15" or "ubuntu20"
-#     <gccversion> is "10.2.0"
+#     <mpiversion> is "5.0.5"
+#     <osversion> is "opensuse15" or "ubuntu24"
+#     <gccversion> is "14.2.0"
