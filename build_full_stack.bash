@@ -196,19 +196,21 @@ then
 elif [[ "$COMPILER" == "ifx" ]]
 then
    COMPILER_NAME="ifx"
-   COMPILER_VERSION=${IFX_VERSION}
+   COMPILER_VERSION=${INTEL_VERSION}
    MPI_NAME="intelmpi"
    MPI_VERSION=${INTELMPI_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env"
 elif [[ "$COMPILER" == "ifort" ]]
 then
    COMPILER_NAME="ifort"
-   COMPILER_VERSION=${IFORT_VERSION}
    MPI_NAME="intelmpi"
-   # We hardcode the ifort intelmpi version as
+   # We hardcode the ifort versions as
    # it is "stable" and will never change
    # unlike ifx
+   COMPILER_VERSION="2021.13"
+   INTEL_VERSION="2024.2"
    MPI_VERSION="2021.13"
+   INTELMPI_VERSION="2021.13"
    FINAL_DOCKER_IMAGE_NAME="geos-env"
 elif [[ "$COMPILER" == "gnu" ]]
 then
@@ -271,8 +273,6 @@ then
    echo "  BASE_IMAGE: ${BASE_IMAGE}"
    echo "  GCC_VERSION: ${GCC_VERSION}"
    echo "  INTEL_VERSION: ${INTEL_VERSION}"
-   echo "  IFX_VERSION: ${IFX_VERSION}"
-   echo "  IFORT_VERSION: ${IFORT_VERSION}"
    echo "  INTELMPI_VERSION: ${INTELMPI_VERSION}"
    echo "  OPENMPI_VERSION: ${OPENMPI_VERSION}"
    echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
@@ -349,7 +349,6 @@ then
    doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg intelversion=${INTEL_VERSION} \
-      --build-arg ifxversion=${IFX_VERSION} \
       --build-arg intelmpiversion=${INTELMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${OS_DOCKER_DIR}/Dockerfile.ifx \
@@ -367,7 +366,6 @@ then
    doCmd docker build \
       --build-arg baseimage=${BASE_IMAGE} \
       --build-arg intelversion=${INTEL_VERSION} \
-      --build-arg ifortversion=${IFORT_VERSION} \
       --build-arg intelmpiversion=${INTELMPI_VERSION} \
       --build-arg osversion=${OS_VERSION} \
       -f ${OS_DOCKER_DIR}/Dockerfile.ifort \

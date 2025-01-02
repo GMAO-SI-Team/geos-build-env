@@ -28,7 +28,7 @@ RUN git clone -b ${fv3version} https://github.com/GEOS-ESM/GEOSfvdycore.git /GEO
 #
 #   where (for example):
 #     <fv3version> is "1.1.0"
-#     <baselibversion> is "6.0.16"
-#     <osversion> is "opensuse15" or "ubuntu20"
-#     <compilerversion> is "10.2.0"
-#     <mpiversion> is "4.0.5"
+#     <baselibversion> is "8.7.0"
+#     <osversion> is "opensuse15" or "ubuntu24"
+#     <compilerversion> is "14.2.0"
+#     <mpiversion> is "5.0.5"

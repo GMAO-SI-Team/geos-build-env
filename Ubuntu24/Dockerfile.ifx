@@ -43,11 +43,11 @@ ENV FI_PROVIDER_PATH=/opt/intel/oneapi/mpi/${intelmpiversion}//libfabric/lib/pro
 
 ENV CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
 ENV CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
-ENV FC=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+ENV FC=/opt/intel/oneapi/compiler/${intelversion}/bin/ifx
 
 ENV I_MPI_CC=/opt/intel/oneapi/compiler/${intelversion}/bin/icx
 ENV I_MPI_CXX=/opt/intel/oneapi/compiler/${intelversion}/bin/icpx
-ENV I_MPI_F90=/opt/intel/oneapi/compiler/${intelversion}/bin/ifort
+ENV I_MPI_F90=/opt/intel/oneapi/compiler/${intelversion}/bin/ifx
 
 ENV I_MPI_ROOT=/opt/intel/oneapi/mpi/${intelmpiversion}
 ENV MKLROOT=/opt/intel/oneapi/mkl/${intelversion}
@@ -58,5 +58,5 @@ ENV MKLROOT=/opt/intel/oneapi/mkl/${intelversion}
 #   where (for example):
 #     <intelversion> is "2024.1"
 #     <intelmpiversion> is "2021.12"
-#     <baseimage> is "opensuse:15.2" or "ubuntu20:20.04"
-#     <osversion> is "opensuse15" or "ubuntu20"
+#     <baseimage> is "opensuse:15.2" or "ubuntu24:24.04"
+#     <osversion> is "opensuse15" or "ubuntu24"
