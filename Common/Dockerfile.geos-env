@@ -11,9 +11,6 @@ FROM ${BASELIBS_IMAGE}
 
 ARG mepoversion
 
-#RUN cd / && \
-    #git clone -b ${mepoversion} https://github.com/GEOS-ESM/mepo.git
-
 ENV PIPX_BIN_DIR=/root/.local/bin
 RUN pipx install mepo
 ENV PATH=${PIPX_BIN_DIR}:${PATH}
