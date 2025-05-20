@@ -9,8 +9,6 @@ ARG mpiversion
 ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
 FROM ${BASELIBS_IMAGE}
 
-ARG mepoversion
-
 ENV PIPX_BIN_DIR=/root/.local/bin
 RUN pipx install mepo
 ENV PATH=${PIPX_BIN_DIR}:${PATH}
