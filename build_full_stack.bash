@@ -452,6 +452,16 @@ then
    fi
 fi
 
+# We need to know which Docker file to use
+ver="${BCS_VERSION#v}"
+major="${ver%%.*}"
+if (( major >= 12 ))
+then
+   BCS_DOCKERFILE_VERSION="v12"
+else
+   BCS_DOCKERFILE_VERSION="v10"
+fi
+
 ## GEOS Build Env with BCs
 if [[ "$BUILD_BCS" == "TRUE" ]]
 then
@@ -464,7 +474,7 @@ then
       --build-arg osversion=${OS_VERSION} \
       --build-arg bcsversion=${BCS_VERSION} \
       --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs \
+      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs-${BCS_DOCKERFILE_VERSION} \
       -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION} .
 
    if [[ "$DO_PUSH" == "TRUE" ]]
