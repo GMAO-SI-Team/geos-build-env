@@ -74,6 +74,10 @@ usage () {
          Tag of GCM to build (Default: ${GCM_VERSION}, useful only if --build-gcm is on)
       --fv3-version=<tag>
          Tag of FV3 Standalone to build (Default: ${FV3_VERSION}, useful only if --build-fv3 is on)
+      --bcs-version=<tag>
+         Tag of the BCs to use (Default: ${BCS_VERSION})
+      --gcc-version=<tag>
+         Version of GCC to use (Default: ${GCC_VERSION})
 
    OTHER OPTIONS:
       -h|--help
@@ -126,6 +130,7 @@ while getopts hno:v-: OPT; do
         gcm-version      ) needs_arg; GCM_VERSION="$OPTARG"      ;;
         fv3-version      ) needs_arg; FV3_VERSION="$OPTARG"      ;;
         bcs-version      ) needs_arg; BCS_VERSION="$OPTARG"      ;;
+        gcc-version      ) needs_arg; GCC_VERSION="$OPTARG"      ;;
 
         no-cache    ) NO_CACHE="--no-cache" ;;
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
@@ -279,6 +284,7 @@ then
    echo "  FV3_VERSION: ${FV3_VERSION}"
    echo "  GCM_VERSION: ${GCM_VERSION}"
    echo "  BCS_VERSION: ${BCS_VERSION}"
+   echo "  GCC_VERSION: ${GCC_VERSION}"
    echo "  CMAKE_VERSION: ${CMAKE_VERSION}"
    echo "  ESMF_VERSION: ${ESMF_VERSION}"
    echo ""
