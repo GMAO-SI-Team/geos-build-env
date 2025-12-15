@@ -49,6 +49,8 @@ usage () {
          Build the GEOS Environment image with BCs
       --build-mkl
          Build the Intel MKL image
+      --build-blas
+         Build the OpenBLAS image
       --build-all
          Build the above images (images needed to build GEOSgcm)
 
@@ -110,6 +112,7 @@ BUILD_OPENMPI=FALSE # MPI Image
 BUILD_BSL=FALSE     # Baselibs Image
 BUILD_ENV=FALSE     # GEOS Enviroment (mepo and checkout_externals)
 BUILD_MKL=FALSE     # MKL
+BUILD_BLAS=FALSE    # OpenBLAS
 BUILD_BCS=FALSE     # BCS Image
 BUILD_FV3=FALSE     # FV3 Standalone
 BUILD_GCM=FALSE     # GEOSgcm
@@ -145,6 +148,7 @@ while getopts hno:v-: OPT; do
         build-bsl     ) BUILD_BSL=TRUE     ;;
         build-env     ) BUILD_ENV=TRUE     ;;
         build-mkl     ) BUILD_MKL=TRUE     ;;
+        build-blas    ) BUILD_BLAS=TRUE    ;;
         build-bcs     ) BUILD_BCS=TRUE     ;;
         build-gcm     ) BUILD_GCM=TRUE     ;;
         build-fv3     ) BUILD_FV3=TRUE     ;;
@@ -224,6 +228,7 @@ then
    MPI_NAME="openmpi"
    MPI_VERSION=${OPENMPI_VERSION}
    FINAL_DOCKER_IMAGE_NAME="geos-env-mkl"
+   #FINAL_DOCKER_IMAGE_NAME="geos-env-blas"
 else
    echo "Invalid compiler!"
    usage
@@ -252,6 +257,7 @@ then
       BUILD_BSL=TRUE # Baselibs Image
       BUILD_ENV=TRUE # GEOS Enviroment (mepo and checkout_externals)
       BUILD_MKL=TRUE # MKL
+      #BUILD_BLAS=TRUE # OpenBLAS
    fi
 fi
 
@@ -297,6 +303,7 @@ then
    echo "  BUILD_BSL=${BUILD_BSL}"
    echo "  BUILD_ENV=${BUILD_ENV}"
    echo "  BUILD_MKL=${BUILD_MKL}"
+   echo "  BUILD_BLAS=${BUILD_BLAS}"
    echo "  BUILD_BCS=${BUILD_BCS}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
@@ -455,6 +462,25 @@ then
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
       doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+   fi
+fi
+
+## GEOS Build Env with OpenBLAS
+if [[ "$BUILD_BLAS" == "TRUE" ]]
+then
+   doCmd docker build \
+      --build-arg baselibversion=${BASELIBS_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-blas \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
    fi
 fi
 
