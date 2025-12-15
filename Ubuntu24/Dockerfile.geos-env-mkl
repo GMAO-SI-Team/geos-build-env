@@ -14,12 +14,12 @@ FROM ${GEOS_ENV_IMAGE}
 RUN wget -O - https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB 2> /dev/null | apt-key add - && \
     apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository "deb https://apt.repos.intel.com/oneapi all main" && \
+    add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main" && \
     apt-get update && \
     apt-get install -y intel-oneapi-mkl intel-oneapi-mkl-devel && \
-    (rm -rf /opt/intel/compiler ) ; \
-    (rm -rf /opt/intel/tcm ) ; \
-    (rm -rf /opt/intel/tbb ) ; \
+    (rm -rf /opt/intel/oneapi/compiler ) ; \
+    (rm -rf /opt/intel/oneapi/tcm ) ; \
+    (rm -rf /opt/intel/oneapi/tbb ) ; \
     (find /opt/intel -name "ia32*" -exec rm -rf {} \; || echo "removing ia32 binaries") ; \
     (find /opt/intel -name "examples" -type d -exec rm -rf {} \; || echo "removing examples") ; \
     (find /opt/intel -name "benchmarks" -exec rm -rf {} \; || echo "removing benchmarks") ; \
