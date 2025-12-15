@@ -1,4 +1,4 @@
-# Mepo and Manage externals
+# Mepo
 
 ARG baselibversion
 ARG osversion
@@ -10,7 +10,8 @@ ARG BASELIBS_IMAGE=gmao/${osversion}-baselibs:${baselibversion}-${mpiname}_${mpi
 FROM ${BASELIBS_IMAGE}
 
 ENV PIPX_BIN_DIR=/root/.local/bin
-RUN pipx install mepo
+RUN pipx install mepo && \
+    echo "alias lt='ls -ltr'" >> /root/.bashrc
 ENV PATH=${PIPX_BIN_DIR}:${PATH}
 
 # Build command
