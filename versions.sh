@@ -13,8 +13,8 @@ OPENMPI_VERSION=5.0.5
 # an issue with omp_lib: https://community.intel.com/t5/Intel-Fortran-Compiler/After-upgrading-ifort-no-longer-finds-include-dir-for-OpenMP/m-p/1602472
 
 # NOTE NOTE Intel ifort is now dead! The versions are hardcoded in the build script
-INTEL_VERSION=2025.2
-INTELMPI_VERSION=2021.16
+INTEL_VERSION=2025.3
+INTELMPI_VERSION=2021.17
 
 BASELIBS_VERSION='v9.0.0'
 
