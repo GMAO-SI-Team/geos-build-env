@@ -7,7 +7,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y \
-       autoconf \
        automake \
        bc \
        bison \
@@ -44,6 +43,16 @@ RUN apt-get update && \
     apt-get clean autoclean && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
+
+# Build autoconf 2.72 from source (ubuntu:24.04 only ships 2.71)
+RUN wget -q https://ftp.gnu.org/gnu/autoconf/autoconf-2.72.tar.gz && \
+    tar xzf autoconf-2.72.tar.gz && \
+    cd autoconf-2.72 && \
+    ./configure --prefix=/usr/local && \
+    make -j$(nproc) && \
+    make install && \
+    cd .. && \
+    rm -rf autoconf-2.72 autoconf-2.72.tar.gz
 
 # Build command
 # > docker build --build-arg cmakeversion=x.y.z -f Dockerfile.ubuntu -t gmao/ubuntu24:<version> .
