@@ -1,0 +1,25 @@
+# Dockerfile for GEOS Environment with Regression Test Data
+
+ARG regressionversion
+ARG baselibversion
+ARG osversion
+ARG compilerversion
+ARG compilername
+ARG mpiversion
+ARG mpiname
+ARG imagename
+
+ARG REGRESSION_IMAGE=gmao/geos-regression:${regressionversion}
+ARG GEOS_ENV_IMAGE=gmao/${osversion}-${imagename}:${baselibversion}-${mpiname}_${mpiversion}-${compilername}_${compilerversion}
+
+FROM ${REGRESSION_IMAGE} AS regimage
+
+FROM ${GEOS_ENV_IMAGE}
+
+COPY --from=regimage /regression-data /regression-data
+
+ENV LOCAL_REGRESSION_DATA_DIR=/regression-data
+
+# Build command
+# > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> --build-arg regressionversion=<regressionversion> -f Dockerfile.geos-env-regression-v1 -t gmao/<osversion>-geos-env-regression:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion>-regression_<regressionversion> .
+#

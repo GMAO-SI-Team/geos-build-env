@@ -47,6 +47,8 @@ usage () {
          Build the GEOS Environment image
       --build-bcs
          Build the GEOS Environment image with BCs
+      --build-regression
+         Build the GEOS Environment image with Regression test data
       --build-mkl
          Build the Intel MKL image
       --build-blas
@@ -78,6 +80,8 @@ usage () {
          Tag of FV3 Standalone to build (Default: ${FV3_VERSION}, useful only if --build-fv3 is on)
       --bcs-version=<tag>
          Tag of the BCs to use (Default: ${BCS_VERSION})
+      --regression-version=<tag>
+         Tag of the Regression data to use (Default: ${REGRESSION_VERSION})
       --gcc-version=<tag>
          Version of GCC to use (Default: ${GCC_VERSION})
 
@@ -114,6 +118,7 @@ BUILD_ENV=FALSE     # GEOS Enviroment (mepo and checkout_externals)
 BUILD_MKL=FALSE     # MKL
 BUILD_BLAS=FALSE    # OpenBLAS
 BUILD_BCS=FALSE     # BCS Image
+BUILD_REGRESSION=FALSE # Regression Data Image
 BUILD_FV3=FALSE     # FV3 Standalone
 BUILD_GCM=FALSE     # GEOSgcm
 
@@ -128,30 +133,32 @@ while getopts hno:v-: OPT; do
     o | os-version       ) needs_arg; OS_VERSION="$OPTARG"       ;;
         compiler         ) needs_arg; COMPILER="$OPTARG"         ;;
 
-        baselibs-version ) needs_arg; BASELIBS_VERSION="$OPTARG" ;;
-        esmf-version     ) needs_arg; ESMF_VERSION="$OPTARG"     ;;
-        gcm-version      ) needs_arg; GCM_VERSION="$OPTARG"      ;;
-        fv3-version      ) needs_arg; FV3_VERSION="$OPTARG"      ;;
-        bcs-version      ) needs_arg; BCS_VERSION="$OPTARG"      ;;
-        gcc-version      ) needs_arg; GCC_VERSION="$OPTARG"      ;;
+        baselibs-version   ) needs_arg; BASELIBS_VERSION="$OPTARG"   ;;
+        esmf-version       ) needs_arg; ESMF_VERSION="$OPTARG"       ;;
+        gcm-version        ) needs_arg; GCM_VERSION="$OPTARG"        ;;
+        fv3-version        ) needs_arg; FV3_VERSION="$OPTARG"        ;;
+        bcs-version        ) needs_arg; BCS_VERSION="$OPTARG"        ;;
+        regression-version ) needs_arg; REGRESSION_VERSION="$OPTARG" ;;
+        gcc-version        ) needs_arg; GCC_VERSION="$OPTARG"        ;;
 
         no-cache    ) NO_CACHE="--no-cache" ;;
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
         push        ) DO_PUSH=TRUE          ;;
 
-        build-all     ) BUILD_ALL=TRUE     ;;
-        build-base    ) BUILD_BASE=TRUE    ;;
-        build-gcc     ) BUILD_GCC=TRUE     ;;
-        build-ifx     ) BUILD_IFX=TRUE     ;;
-        build-ifort   ) BUILD_IFORT=TRUE   ;;
-        build-openmpi ) BUILD_OPENMPI=TRUE ;;
-        build-bsl     ) BUILD_BSL=TRUE     ;;
-        build-env     ) BUILD_ENV=TRUE     ;;
-        build-mkl     ) BUILD_MKL=TRUE     ;;
-        build-blas    ) BUILD_BLAS=TRUE    ;;
-        build-bcs     ) BUILD_BCS=TRUE     ;;
-        build-gcm     ) BUILD_GCM=TRUE     ;;
-        build-fv3     ) BUILD_FV3=TRUE     ;;
+        build-all        ) BUILD_ALL=TRUE        ;;
+        build-base       ) BUILD_BASE=TRUE       ;;
+        build-gcc        ) BUILD_GCC=TRUE        ;;
+        build-ifx        ) BUILD_IFX=TRUE        ;;
+        build-ifort      ) BUILD_IFORT=TRUE      ;;
+        build-openmpi    ) BUILD_OPENMPI=TRUE    ;;
+        build-bsl        ) BUILD_BSL=TRUE        ;;
+        build-env        ) BUILD_ENV=TRUE        ;;
+        build-mkl        ) BUILD_MKL=TRUE        ;;
+        build-blas       ) BUILD_BLAS=TRUE       ;;
+        build-bcs        ) BUILD_BCS=TRUE        ;;
+        build-regression ) BUILD_REGRESSION=TRUE ;;
+        build-gcm        ) BUILD_GCM=TRUE        ;;
+        build-fv3        ) BUILD_FV3=TRUE        ;;
 
     h | help     ) usage; exit  ;;
     n | dry-run  ) DRYRUN=TRUE  ;;
@@ -290,6 +297,7 @@ then
    echo "  FV3_VERSION: ${FV3_VERSION}"
    echo "  GCM_VERSION: ${GCM_VERSION}"
    echo "  BCS_VERSION: ${BCS_VERSION}"
+   echo "  REGRESSION_VERSION: ${REGRESSION_VERSION}"
    echo "  GCC_VERSION: ${GCC_VERSION}"
    echo "  CMAKE_VERSION: ${CMAKE_VERSION}"
    echo "  ESMF_VERSION: ${ESMF_VERSION}"
@@ -305,6 +313,7 @@ then
    echo "  BUILD_MKL=${BUILD_MKL}"
    echo "  BUILD_BLAS=${BUILD_BLAS}"
    echo "  BUILD_BCS=${BUILD_BCS}"
+   echo "  BUILD_REGRESSION=${BUILD_REGRESSION}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
    echo ""
@@ -512,6 +521,27 @@ then
    if [[ "$DO_PUSH" == "TRUE" ]]
    then
       doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
+   fi
+fi
+
+## GEOS Build Env with Regression Data
+if [[ "$BUILD_REGRESSION" == "TRUE" ]]
+then
+   doCmd docker build \
+      --build-arg baselibversion=${BASELIBS_VERSION} \
+      --build-arg mpiname=${MPI_NAME} \
+      --build-arg mpiversion=${MPI_VERSION} \
+      --build-arg compilername=${COMPILER_NAME} \
+      --build-arg compilerversion=${COMPILER_VERSION} \
+      --build-arg osversion=${OS_VERSION} \
+      --build-arg regressionversion=${REGRESSION_VERSION} \
+      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
+      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-regression \
+      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION} .
+
+   if [[ "$DO_PUSH" == "TRUE" ]]
+   then
+      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION}
    fi
 fi
 
