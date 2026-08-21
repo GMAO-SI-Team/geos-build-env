@@ -1,7 +1,86 @@
 # Repo for the Dockerfiles for geos-build-env
 
-The main script to use here is `build_full_stack.bash`. The options for
-it are:
+The main script to use here is `build_full_stack.bash`.
+
+## Common Usage Examples
+
+### 1. Update the BCs image for all compilers and Baselibs
+
+When a new Boundary Conditions (BCs) version is tagged (e.g. `v12.0.0`), rebuild only the BCs layer (`--build-bcs`) on top of existing environment images:
+
+```bash
+# GNU (GCC 15)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 \
+  --baselibs-version=v8.32.0,v9.12.0 --bcs-version=v12.0.0 --build-bcs --push
+
+# Intel ifort
+./build_full_stack.bash -o ubuntu24 --compiler=ifort \
+  --baselibs-version=v8.32.0,v9.12.0 --bcs-version=v12.0.0 --build-bcs --push
+
+# Intel ifx
+./build_full_stack.bash -o ubuntu24 --compiler=ifx \
+  --baselibs-version=v8.32.0,v9.12.0 --bcs-version=v12.0.0 --build-bcs --push
+```
+
+---
+
+### 2. Update the Regression image for all compilers and Baselibs
+
+When regression data is updated (e.g. `v1.0.0`), rebuild only the regression layer (`--build-regression`) on top of existing environment images *(Note: regression images do not depend on `--bcs-version`)*:
+
+```bash
+# GNU (GCC 15)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 \
+  --baselibs-version=v8.32.0,v9.12.0 --regression-version=v1.0.0 --build-regression --push
+
+# Intel ifort
+./build_full_stack.bash -o ubuntu24 --compiler=ifort \
+  --baselibs-version=v8.32.0,v9.12.0 --regression-version=v1.0.0 --build-regression --push
+
+# Intel ifx
+./build_full_stack.bash -o ubuntu24 --compiler=ifx \
+  --baselibs-version=v8.32.0,v9.12.0 --regression-version=v1.0.0 --build-regression --push
+```
+
+---
+
+### 3. Update Baselibs for all compilers (and rebuild downstream stack)
+
+When a new version of Baselibs is released, use `--build-baselibs-stack` (or `--build-bsl-stack`) to automatically rebuild Baselibs and all downstream dependent images (`--build-bsl`, `--build-env`, `--build-bcs`, `--build-regression`, and `--build-mkl` for GNU automatically).
+
+> **Tip:** Use `--prune` to automatically clean builder cache between Baselibs iterations.
+
+```bash
+# GNU (GCC 15)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 \
+  --baselibs-version=v9.12.0 --build-baselibs-stack --push --prune
+
+# Intel ifort
+./build_full_stack.bash -o ubuntu24 --compiler=ifort \
+  --baselibs-version=v9.12.0 --build-baselibs-stack --push --prune
+
+# Intel ifx
+./build_full_stack.bash -o ubuntu24 --compiler=ifx \
+  --baselibs-version=v9.12.0 --build-baselibs-stack --push --prune
+```
+
+*(You can also pass multiple Baselibs versions, e.g. `--baselibs-version=v8.32.0,v9.12.0`)*
+
+---
+
+### Disk Space Management Tip
+
+To avoid running out of disk space:
+1. `--prune` automatically runs `docker builder prune -f` after each Baselibs iteration (keeps your base OS and compiler images intact).
+2. Between **different compiler runs** (e.g. after GNU finishes and before starting Intel), run a full prune to free disk space:
+   ```bash
+   docker system prune -a -f
+   ```
+
+---
+
+## Full Script Usage (`build_full_stack.bash -h`)
+
 ```console
 $ ./build_full_stack.bash -h
    Usage: ./build_full_stack.bash -o <osversion>|--os-version=<osversion> <options>
@@ -10,7 +89,7 @@ $ ./build_full_stack.bash -h
       -o <osversion>|--os-version=<osversion>
          OS version to build (REQUIRED. Allowed values: ubuntu20, ubuntu24, opensuse15, centos8)
       --compiler=<compiler>
-         compiler to use (REQUIRED. Allowed values: ifort, intel, gnu)
+         compiler to use (REQUIRED. Allowed values: ifort, ifx, gnu)
 
    BUILD OPTIONS:
       --build-base
@@ -35,6 +114,8 @@ $ ./build_full_stack.bash -h
          Build the Intel MKL image
       --build-blas
          Build the OpenBLAS image
+      --build-baselibs-stack
+         Build all images from Baselibs up (Baselibs, Environment, MKL [if GNU], BCs, Regression)
       --build-all
          Build the above images (images needed to build GEOSgcm)
 
@@ -52,8 +133,9 @@ $ ./build_full_stack.bash -h
          Build image with --no-cache (only affects Baselibs)
 
    VERSION OPTIONS:
-      --baselibs-version=<tag>
-         Tag of Baselibs to checkout (Default: v9.12.0)
+      --baselibs-version=<tag>[,<tag>...]
+         Tag(s) of Baselibs to build. Can be comma-separated, space-separated,
+         or specified multiple times (Default: v9.12.0)
       --esmf-version=<tag>
          Tag of ESMF submodule to checkout in Baselibs (Default: Tag in Baselibs being built)
       --gcm-version=<tag>
@@ -68,6 +150,8 @@ $ ./build_full_stack.bash -h
          Version of GCC to use (Default: 15.2.0)
 
    OTHER OPTIONS:
+      --prune
+         Prune Docker builder cache after each Baselibs iteration
       -h|--help
          Print this usage
       -v|--verbose

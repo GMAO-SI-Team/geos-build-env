@@ -53,6 +53,8 @@ usage () {
          Build the Intel MKL image
       --build-blas
          Build the OpenBLAS image
+      --build-baselibs-stack
+         Build all images from Baselibs up (Baselibs, Environment, MKL [if GNU], BCs, Regression)
       --build-all
          Build the above images (images needed to build GEOSgcm)
 
@@ -70,8 +72,9 @@ usage () {
          Build image with --no-cache (only affects Baselibs)
 
    VERSION OPTIONS:
-      --baselibs-version=<tag>
-         Tag of Baselibs to checkout (Default: ${BASELIBS_VERSION})
+      --baselibs-version=<tag>[,<tag>...]
+         Tag(s) of Baselibs to build. Can be comma-separated, space-separated,
+         or specified multiple times (Default: ${BASELIBS_VERSION})
       --esmf-version=<tag>
          Tag of ESMF submodule to checkout in Baselibs (Default: Tag in Baselibs being built)
       --gcm-version=<tag>
@@ -86,6 +89,8 @@ usage () {
          Version of GCC to use (Default: ${GCC_VERSION})
 
    OTHER OPTIONS:
+      --prune
+         Prune Docker builder cache after each Baselibs iteration
       -h|--help
          Print this usage
       -v|--verbose
@@ -100,13 +105,16 @@ DRYRUN=FALSE
 
 NO_CACHE=
 DO_PUSH=FALSE
+DO_PRUNE=FALSE
 
 OS_VERSION=UNKNOWN
 ESMF_VERSION=
 
 COMPILER=UNKNOWN
+BASELIBS_VERSIONS=()
 
 BUILD_ALL=FALSE
+BUILD_BASELIBS_STACK=FALSE
 
 BUILD_BASE=FALSE    # Base Image (Ubuntu 20, Ubuntu 24, OpenSUSE 15, CentOS 8)
 BUILD_GCC=FALSE     # GCC Image
@@ -133,7 +141,13 @@ while getopts hno:v-: OPT; do
     o | os-version       ) needs_arg; OS_VERSION="$OPTARG"       ;;
         compiler         ) needs_arg; COMPILER="$OPTARG"         ;;
 
-        baselibs-version   ) needs_arg; BASELIBS_VERSION="$OPTARG"   ;;
+        baselibs-version | baselibs-versions )
+          needs_arg
+          IFS=', ' read -r -a _parsed_bsl <<< "$OPTARG"
+          for _b in "${_parsed_bsl[@]}"; do
+            [[ -n "$_b" ]] && BASELIBS_VERSIONS+=("$_b")
+          done
+          ;;
         esmf-version       ) needs_arg; ESMF_VERSION="$OPTARG"       ;;
         gcm-version        ) needs_arg; GCM_VERSION="$OPTARG"        ;;
         fv3-version        ) needs_arg; FV3_VERSION="$OPTARG"        ;;
@@ -144,9 +158,11 @@ while getopts hno:v-: OPT; do
         no-cache    ) NO_CACHE="--no-cache" ;;
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
         push        ) DO_PUSH=TRUE          ;;
+        prune       ) DO_PRUNE=TRUE         ;;
 
-        build-all        ) BUILD_ALL=TRUE        ;;
-        build-base       ) BUILD_BASE=TRUE       ;;
+        build-all            ) BUILD_ALL=TRUE            ;;
+        build-baselibs-stack | build-bsl-stack ) BUILD_BASELIBS_STACK=TRUE ;;
+        build-base           ) BUILD_BASE=TRUE           ;;
         build-gcc        ) BUILD_GCC=TRUE        ;;
         build-ifx        ) BUILD_IFX=TRUE        ;;
         build-ifort      ) BUILD_IFORT=TRUE      ;;
@@ -169,6 +185,10 @@ while getopts hno:v-: OPT; do
   esac
 done
 shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
+if [ ${#BASELIBS_VERSIONS[@]} -eq 0 ]; then
+   BASELIBS_VERSIONS=("${BASELIBS_VERSION}")
+fi
 
 if [[ "$VERBOSE" == "TRUE" ]]
 then
@@ -268,6 +288,18 @@ then
    fi
 fi
 
+if [[ "$BUILD_BASELIBS_STACK" == "TRUE" ]]
+then
+   BUILD_BSL=TRUE        # Baselibs Image
+   BUILD_ENV=TRUE        # GEOS Environment (mepo and checkout_externals)
+   BUILD_BCS=TRUE        # BCS Image
+   BUILD_REGRESSION=TRUE # Regression Data Image
+   if [[ "$COMPILER" == "gnu" ]]
+   then
+      BUILD_MKL=TRUE     # MKL (only needed for GNU)
+   fi
+fi
+
 if [[ "$COMPILER" == "intel" && "$BUILD_MKL" == "TRUE" ]]
 then
    echo "ERROR! The Intel image already provides MKL"
@@ -293,7 +325,7 @@ then
    echo "  INTEL_VERSION: ${INTEL_VERSION}"
    echo "  INTELMPI_VERSION: ${INTELMPI_VERSION}"
    echo "  OPENMPI_VERSION: ${OPENMPI_VERSION}"
-   echo "  BASELIBS_VERSION: ${BASELIBS_VERSION}"
+   echo "  BASELIBS_VERSIONS: ${BASELIBS_VERSIONS[*]}"
    echo "  FV3_VERSION: ${FV3_VERSION}"
    echo "  GCM_VERSION: ${GCM_VERSION}"
    echo "  BCS_VERSION: ${BCS_VERSION}"
@@ -316,9 +348,12 @@ then
    echo "  BUILD_REGRESSION=${BUILD_REGRESSION}"
    echo "  BUILD_FV3=${BUILD_FV3}"
    echo "  BUILD_GCM=${BUILD_GCM}"
+   echo "  BUILD_BASELIBS_STACK=${BUILD_BASELIBS_STACK}"
+   echo "  BUILD_ALL=${BUILD_ALL}"
    echo ""
    echo "Docker Options:"
    echo "  DO_PUSH: ${DO_PUSH}"
+   echo "  DO_PRUNE: ${DO_PRUNE}"
    echo "  DOCKER_REPO: ${DOCKER_REPO}"
    echo "  NO_CACHE: ${NO_CACHE}"
    echo ""
@@ -415,173 +450,188 @@ then
    fi
 fi
 
-## Baselibs
-if [[ "$BUILD_BSL" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      --build-arg esmfversion=${ESMF_VERSION} \
-      ${NO_CACHE} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.baselibs \
-      -t ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
-   then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+## Loop through each Baselibs version for downstream images
+for BASELIBS_VERSION in "${BASELIBS_VERSIONS[@]}"; do
+   if [[ ${#BASELIBS_VERSIONS[@]} -gt 1 ]]; then
+      echo ""
+      echo "================================================================================"
+      echo " Building stack for Baselibs: ${BASELIBS_VERSION}"
+      echo "================================================================================"
    fi
-fi
 
-## GEOS Build Env
-if [[ "$BUILD_ENV" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## Baselibs
+   if [[ "$BUILD_BSL" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         --build-arg esmfversion=${ESMF_VERSION} \
+         ${NO_CACHE} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.baselibs \
+         -t ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-baselibs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
    fi
-fi
 
-## GEOS Build Env with MKL
-if [[ "$BUILD_MKL" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-mkl \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## GEOS Build Env
+   if [[ "$BUILD_ENV" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
    fi
-fi
 
-## GEOS Build Env with OpenBLAS
-if [[ "$BUILD_BLAS" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-blas \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## GEOS Build Env with MKL
+   if [[ "$BUILD_MKL" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-mkl \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-mkl:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
    fi
-fi
 
-# We need to know which Docker file to use
-ver="${BCS_VERSION#v}"
-major="${ver%%.*}"
-if (( major >= 12 ))
-then
-   BCS_DOCKERFILE_VERSION="v12"
-else
-   BCS_DOCKERFILE_VERSION="v10"
-fi
-
-## GEOS Build Env with BCs
-if [[ "$BUILD_BCS" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      --build-arg bcsversion=${BCS_VERSION} \
-      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs-${BCS_DOCKERFILE_VERSION} \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## GEOS Build Env with OpenBLAS
+   if [[ "$BUILD_BLAS" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         -f ${OS_DOCKER_DIR}/Dockerfile.geos-env-blas \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-blas:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
    fi
-fi
 
-## GEOS Build Env with Regression Data
-if [[ "$BUILD_REGRESSION" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      --build-arg regressionversion=${REGRESSION_VERSION} \
-      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-regression \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   # We need to know which Docker file to use
+   ver="${BCS_VERSION#v}"
+   major="${ver%%.*}"
+   if (( major >= 12 ))
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION}
+      BCS_DOCKERFILE_VERSION="v12"
+   else
+      BCS_DOCKERFILE_VERSION="v10"
    fi
-fi
 
-## FV3 Standalone
-if [[ "$BUILD_FV3" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg fv3version=${FV3_VERSION} \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## GEOS Build Env with BCs
+   if [[ "$BUILD_BCS" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         --build-arg bcsversion=${BCS_VERSION} \
+         --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-bcs-${BCS_DOCKERFILE_VERSION} \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-bcs:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-bcs_${BCS_VERSION}
+      fi
    fi
-fi
 
-## GEOSgcm
-if [[ "$BUILD_GCM" == "TRUE" ]]
-then
-   doCmd docker build \
-      --build-arg gcmversion=${GCM_VERSION} \
-      --build-arg baselibversion=${BASELIBS_VERSION} \
-      --build-arg mpiname=${MPI_NAME} \
-      --build-arg mpiversion=${MPI_VERSION} \
-      --build-arg compilername=${COMPILER_NAME} \
-      --build-arg compilerversion=${COMPILER_VERSION} \
-      --build-arg osversion=${OS_VERSION} \
-      -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
-      -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
-
-   if [[ "$DO_PUSH" == "TRUE" ]]
+   ## GEOS Build Env with Regression Data
+   if [[ "$BUILD_REGRESSION" == "TRUE" ]]
    then
-      doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      doCmd docker build \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         --build-arg regressionversion=${REGRESSION_VERSION} \
+         --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-env-regression \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-env-regression:${BASELIBS_VERSION}-${MPI_NAME}_${MPI_VERSION}-${COMPILER_NAME}_${COMPILER_VERSION}-regression_${REGRESSION_VERSION}
+      fi
    fi
-fi
+
+   ## FV3 Standalone
+   if [[ "$BUILD_FV3" == "TRUE" ]]
+   then
+      doCmd docker build \
+         --build-arg fv3version=${FV3_VERSION} \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         --build-arg imagename=${FINAL_DOCKER_IMAGE_NAME} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-fv3standalone \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-fv3standalone:${FV3_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
+   fi
+
+   ## GEOSgcm
+   if [[ "$BUILD_GCM" == "TRUE" ]]
+   then
+      doCmd docker build \
+         --build-arg gcmversion=${GCM_VERSION} \
+         --build-arg baselibversion=${BASELIBS_VERSION} \
+         --build-arg mpiname=${MPI_NAME} \
+         --build-arg mpiversion=${MPI_VERSION} \
+         --build-arg compilername=${COMPILER_NAME} \
+         --build-arg compilerversion=${COMPILER_VERSION} \
+         --build-arg osversion=${OS_VERSION} \
+         -f ${COMMON_DOCKER_DIR}/Dockerfile.geos-gcm \
+         -t ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION} .
+
+      if [[ "$DO_PUSH" == "TRUE" ]]
+      then
+         doCmd docker push ${DOCKER_REPO}/${OS_VERSION}-geos-gcm:${GCM_VERSION}_${COMPILER_NAME}_${COMPILER_VERSION}
+      fi
+   fi
+
+   if [[ "$DO_PRUNE" == "TRUE" ]]
+   then
+      doCmd docker builder prune -f
+   fi
+done
