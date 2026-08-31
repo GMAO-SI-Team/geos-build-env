@@ -68,6 +68,26 @@ When a new version of Baselibs is released, use `--build-baselibs-stack` (or `--
 
 ---
 
+### 4. Build the entire stack from scratch (Base OS → Compilers → Baselibs → BCs/Regression)
+
+When the base OS Dockerfile changes (e.g. adding new system packages like `python3-netcdf4`), rebuild the base image (`--build-base`), compiler/MPI images, and the Baselibs stack:
+
+```bash
+# GNU (Base OS -> GCC 15 -> Open MPI -> Baselibs stack)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 \
+  --baselibs-version=v8.32.0,v9.12.0 --build-base --build-gcc --build-openmpi --build-baselibs-stack --push --prune
+
+# Intel ifort (Base OS -> ifort -> Baselibs stack)
+./build_full_stack.bash -o ubuntu24 --compiler=ifort \
+  --baselibs-version=v8.32.0,v9.12.0 --build-base --build-ifort --build-baselibs-stack --push --prune
+
+# Intel ifx (Base OS -> ifx -> Baselibs stack)
+./build_full_stack.bash -o ubuntu24 --compiler=ifx \
+  --baselibs-version=v8.32.0,v9.12.0 --build-base --build-ifx --build-baselibs-stack --push --prune
+```
+
+---
+
 ### Disk Space Management Tip
 
 To avoid running out of disk space:
