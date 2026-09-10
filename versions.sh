@@ -4,10 +4,11 @@ CMAKE_VERSION=3.30.5
 
 #GCC_VERSION=14.4.0
 GCC_VERSION=15.2.0
-OPENMPI_VERSION=5.0.5
+#GCC_VERSION=16.2.0
 
-#GCC_VERSION=15.1.0
-#OPENMPI_VERSION=5.0.8
+OPENMPI_VERSION=5.0.5
+# NOTE: GCC 16 requires Open MPI 5.0.11rc1 for now
+#OPENMPI_VERSION=5.0.11rc1
 
 # Note Intel 2024.1 apt image seems to have
 # an issue with omp_lib: https://community.intel.com/t5/Intel-Fortran-Compiler/After-upgrading-ifort-no-longer-finds-include-dir-for-OpenMP/m-p/1602472
