@@ -10,7 +10,10 @@ When a new Boundary Conditions (BCs) version is tagged (e.g. `v12.0.0`), rebuild
 
 ```bash
 # GNU (GCC 15)
-./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --baselibs-version=v8.33.0,v9.13.0 --bcs-version=v12.0.0 --build-bcs --push
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5 --baselibs-version=v8.33.0,v9.13.0 --bcs-version=v12.0.0 --build-bcs --push
+
+# GNU (GCC 16.2 / Open MPI 5.0.11rc1)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=16.2.0 --openmpi-version=5.0.11rc1 --baselibs-version=v8.33.0,v9.13.0 --bcs-version=v12.0.0 --build-bcs --push
 
 # Intel ifort
 ./build_full_stack.bash -o ubuntu24 --compiler=ifort --baselibs-version=v8.33.0,v9.13.0 --bcs-version=v12.0.0 --build-bcs --push
@@ -27,7 +30,10 @@ When regression data is updated (e.g. `v1.0.0`), rebuild only the regression lay
 
 ```bash
 # GNU (GCC 15)
-./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --baselibs-version=v8.33.0,v9.13.0 --regression-version=v1.0.0 --build-regression --push
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5 --baselibs-version=v8.33.0,v9.13.0 --regression-version=v1.0.0 --build-regression --push
+
+# GNU (GCC 16.2 / Open MPI 5.0.11rc1)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=16.2.0 --openmpi-version=5.0.11rc1 --baselibs-version=v8.33.0,v9.13.0 --regression-version=v1.0.0 --build-regression --push
 
 # Intel ifort
 ./build_full_stack.bash -o ubuntu24 --compiler=ifort --baselibs-version=v8.33.0,v9.13.0 --regression-version=v1.0.0 --build-regression --push
@@ -46,7 +52,10 @@ When a new version of Baselibs is released, use `--build-baselibs-stack` (or `--
 
 ```bash
 # GNU (GCC 15)
-./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --baselibs-version=v8.33.0,v9.13.0 --build-baselibs-stack --push --prune
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5 --baselibs-version=v8.33.0,v9.13.0 --build-baselibs-stack --push --prune
+
+# GNU (GCC 16.2 / Open MPI 5.0.11rc1)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=16.2.0 --openmpi-version=5.0.11rc1 --baselibs-version=v8.33.0,v9.13.0 --build-baselibs-stack --push --prune
 
 # Intel ifort
 ./build_full_stack.bash -o ubuntu24 --compiler=ifort --baselibs-version=v8.33.0,v9.13.0 --build-baselibs-stack --push --prune
@@ -65,7 +74,10 @@ When the base OS Dockerfile changes (e.g. adding new system packages like `pytho
 
 ```bash
 # GNU (Base OS -> GCC 15 -> Open MPI -> Baselibs stack)
-./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --baselibs-version=v8.33.0,v9.13.0 --build-base --build-gcc --build-openmpi --build-baselibs-stack --push --prune
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5 --baselibs-version=v8.33.0,v9.13.0 --build-base --build-gcc --build-openmpi --build-baselibs-stack --push --prune
+
+# GNU (Base OS -> GCC 16.2 -> Open MPI 5.0.11rc1 -> Baselibs stack)
+./build_full_stack.bash -o ubuntu24 --compiler=gnu --gcc-version=16.2.0 --openmpi-version=5.0.11rc1 --baselibs-version=v8.33.0,v9.13.0 --build-base --build-gcc --build-openmpi --build-baselibs-stack --push --prune
 
 # Intel ifort (Base OS -> ifort -> Baselibs stack)
 ./build_full_stack.bash -o ubuntu24 --compiler=ifort --baselibs-version=v8.33.0,v9.13.0 --build-base --build-ifort --build-baselibs-stack --push --prune
@@ -156,6 +168,8 @@ $ ./build_full_stack.bash -h
          Tag of the Regression data to use (Default: v1.0.0)
       --gcc-version=<tag>
          Version of GCC to use (Default: 15.2.0)
+      --openmpi-version=<tag>
+         Version of Open MPI to use (Default: 5.0.5)
 
    OTHER OPTIONS:
       --prune

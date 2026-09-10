@@ -87,6 +87,8 @@ usage () {
          Tag of the Regression data to use (Default: ${REGRESSION_VERSION})
       --gcc-version=<tag>
          Version of GCC to use (Default: ${GCC_VERSION})
+      --openmpi-version=<tag>
+         Version of Open MPI to use (Default: ${OPENMPI_VERSION})
 
    OTHER OPTIONS:
       --prune
@@ -154,6 +156,7 @@ while getopts hno:v-: OPT; do
         bcs-version        ) needs_arg; BCS_VERSION="$OPTARG"        ;;
         regression-version ) needs_arg; REGRESSION_VERSION="$OPTARG" ;;
         gcc-version        ) needs_arg; GCC_VERSION="$OPTARG"        ;;
+        openmpi-version | mpi-version ) needs_arg; OPENMPI_VERSION="$OPTARG" ;;
 
         no-cache    ) NO_CACHE="--no-cache" ;;
         docker-repo ) needs_arg; DOCKER_REPO="$OPTARG"      ;;
