@@ -14,6 +14,14 @@ RUN pipx install mepo && \
     echo "alias lt='ls -ltr'" >> /root/.bashrc
 ENV PATH=${PIPX_BIN_DIR}:${PATH}
 
+# Create versioned compiler symlinks if GCC is present
+RUN if [ -f /gcc/bin/gfortran ]; then \
+        major=$(/gcc/bin/gfortran -dumpversion | cut -d. -f1) && \
+        ln -sf /gcc/bin/gcc /gcc/bin/gcc-${major} && \
+        ln -sf /gcc/bin/g++ /gcc/bin/g++-${major} && \
+        ln -sf /gcc/bin/gfortran /gcc/bin/gfortran-${major}; \
+    fi
+
 # Build command
 # > docker build --build-arg baselibversion=<baselibversion> --build-arg osversion=<osversion> --build-arg compilerversion=<compilerversion> --build-arg mpiversion=<mpiversion> -f Dockerfile.geos-env -t gmao/<osversion>-geos-env:<baselibversion>-<mpiname>_<mpiversion>-<compilername>_<compilerversion> .
 #
