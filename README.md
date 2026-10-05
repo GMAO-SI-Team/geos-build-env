@@ -4,6 +4,26 @@ The main script to use here is `build_full_stack.bash`.
 
 ## Common Usage Examples
 
+### Release Helper Scripts
+
+Use the helper scripts to publish a new data release for all four supported compiler configurations and both maintained Baselibs versions:
+
+```bash
+# Runs all four configurations without a full Docker prune between them.
+./bash/update-regression.bash v1.0.1
+
+# Runs a full Docker prune between configurations to conserve disk space.
+./bash/update-tinybcs.bash v12.0.1
+
+# Rebuilds Baselibs and all downstream layers, pruning between configurations.
+./bash/update-baselibs.bash v9.14.0
+
+# Preview any helper without building, pushing, or pruning Docker resources.
+./bash/update-tinybcs.bash --dry-run v12.0.1
+```
+
+Pass `--dry-run` (or `-n`) to any helper to print the `build_full_stack.bash` and Docker commands it would run without executing them. All helpers finish with `docker system prune -a -f`; tinybcs and Baselibs also run it between configurations. This removes unused Docker images and build cache.
+
 ### 1. Update the BCs image for all compilers and Baselibs
 
 When a new Boundary Conditions (BCs) version is tagged (e.g. `v12.0.0`), rebuild only the BCs layer (`--build-bcs`) on top of existing environment images:
