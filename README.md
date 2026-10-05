@@ -22,7 +22,7 @@ Use the helper scripts to publish a new data release for all four supported comp
 ./bash/update-tinybcs.bash --dry-run v12.0.1
 ```
 
-Pass `--dry-run` (or `-n`) to any helper to print the `build_full_stack.bash` and Docker commands it would run without executing them. All helpers finish with `docker system prune -a -f`; tinybcs and Baselibs also run it between configurations. This removes unused Docker images and build cache.
+Pass `--dry-run` (or `-n`) to any helper to print the `build_full_stack.bash` and Docker commands it would run without executing them. All helpers finish with `docker system prune --all --volumes -f`; tinybcs and Baselibs also run it between configurations. This removes unused Docker images, build cache, and unused volumes.
 
 ### 1. Update the BCs image for all compilers and Baselibs
 

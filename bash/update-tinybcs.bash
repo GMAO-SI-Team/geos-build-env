@@ -41,7 +41,7 @@ build_bcs() {
 }
 
 prune_docker() {
-  run docker system prune -a -f
+  run docker system prune --all --volumes -f
 }
 
 build_bcs --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5

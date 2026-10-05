@@ -40,7 +40,7 @@ build_baselibs_stack() {
 }
 
 prune_docker() {
-  run docker system prune -a -f
+  run docker system prune --all --volumes -f
 }
 
 build_baselibs_stack --compiler=gnu --gcc-version=15.2.0 --openmpi-version=5.0.5

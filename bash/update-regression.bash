@@ -52,4 +52,4 @@ run "${ROOTDIR}/build_full_stack.bash" -o ubuntu24 --compiler=ifx \
   --baselibs-version="$BASELIBS_VERSIONS" \
   --regression-version="$REGRESSION_VERSION" --build-regression --push
 
-run docker system prune -a -f
+run docker system prune --all --volumes -f
