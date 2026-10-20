@@ -10,16 +10,16 @@ Use the helper scripts to publish a new data release for all four supported comp
 
 ```bash
 # Runs all four configurations without a full Docker prune between them.
-./bash/update-regression.bash v1.0.1
+./bash/update-regression.bash v1.0.0
 
 # Runs a full Docker prune between configurations to conserve disk space.
-./bash/update-tinybcs.bash v12.0.1
+./bash/update-tinybcs.bash v12.0.0
 
 # Rebuilds Baselibs and all downstream layers, pruning between configurations.
 ./bash/update-baselibs.bash v9.14.0
 
 # Preview any helper without building, pushing, or pruning Docker resources.
-./bash/update-tinybcs.bash --dry-run v12.0.1
+./bash/update-tinybcs.bash --dry-run v12.0.0
 ```
 
 Pass `--dry-run` (or `-n`) to any helper to print the `build_full_stack.bash` and Docker commands it would run without executing them. All helpers finish with `docker system prune --all --volumes -f`; tinybcs and Baselibs also run it between configurations. This removes unused Docker images, build cache, and unused volumes.
