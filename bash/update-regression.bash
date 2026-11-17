@@ -5,15 +5,20 @@ SCRIPTDIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTDIR="$(dirname "$SCRIPTDIR")"
 
 usage() {
-  echo "Usage: $0 [--dry-run|-n] <regression-version>"
+  echo "Usage: $0 [--dry-run|-n] [--baselibs-version=<tag>[,<tag>...]] <regression-version>"
   exit 2
 }
 
 DRY_RUN=FALSE
 REGRESSION_VERSION=
+BASELIBS_VERSIONS="v8.34.0,v9.14.0"
 for arg in "$@"; do
   case "$arg" in
     --dry-run | -n ) DRY_RUN=TRUE ;;
+    --baselibs-version=* )
+      BASELIBS_VERSIONS="${arg#*=}"
+      [[ -n "$BASELIBS_VERSIONS" ]] || usage
+      ;;
     -* ) usage ;;
     * )
       [[ -z "$REGRESSION_VERSION" ]] || usage
@@ -23,7 +28,6 @@ for arg in "$@"; do
 done
 
 [[ -n "$REGRESSION_VERSION" ]] || usage
-BASELIBS_VERSIONS="v8.33.0,v9.13.0"
 
 run() {
   if [[ "$DRY_RUN" == "TRUE" ]]; then

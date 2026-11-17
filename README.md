@@ -6,11 +6,14 @@ The main script to use here is `build_full_stack.bash`.
 
 ### Release Helper Scripts
 
-Use the helper scripts to publish a new data release for all four supported compiler configurations and both maintained Baselibs versions:
+Use the helper scripts to publish a new data release for all four supported compiler configurations:
 
 ```bash
 # Runs all four configurations without a full Docker prune between them.
 ./bash/update-regression.bash v1.0.0
+
+# Build regression images for four Baselibs versions instead of the default two.
+./bash/update-regression.bash --baselibs-version=v8.33.0,v8.34.0,v9.13.0,v9.14.0 v1.0.0
 
 # Runs a full Docker prune between configurations to conserve disk space.
 ./bash/update-tinybcs.bash v12.0.0
@@ -18,9 +21,11 @@ Use the helper scripts to publish a new data release for all four supported comp
 # Rebuilds Baselibs and all downstream layers, pruning between configurations.
 ./bash/update-baselibs.bash v9.14.0
 
-# Preview any helper without building, pushing, or pruning Docker resources.
-./bash/update-tinybcs.bash --dry-run v12.0.0
+# Preview the four-version regression run without building, pushing, or pruning.
+./bash/update-regression.bash --dry-run --baselibs-version=v8.33.0,v8.34.0,v9.13.0,v9.14.0 v1.0.0
 ```
+
+`update-regression.bash` requires a regression version and defaults to Baselibs `v8.34.0,v9.14.0`. Pass `--baselibs-version=<tag>[,<tag>...]` to select one or more versions; the helper builds and pushes regression images for every selected version across all four compiler configurations. This option and default apply only to the regression helper, not the tinybcs or Baselibs helpers.
 
 Pass `--dry-run` (or `-n`) to any helper to print the `build_full_stack.bash` and Docker commands it would run without executing them. All helpers finish with `docker system prune --all --volumes -f`; tinybcs and Baselibs also run it between configurations. This removes unused Docker images, build cache, and unused volumes.
 
